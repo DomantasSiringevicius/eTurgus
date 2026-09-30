@@ -1,0 +1,63 @@
+## ===== Build results =====
+bin/
+obj/
+out/
+publish/
+*.dll
+*.pdb
+
+## ===== Visual Studio =====
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+## ===== Rider =====
+.idea/
+
+## ===== VS Code =====
+.vscode/
+
+## ===== NuGet =====
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+.nuget/
+
+## ===== ASP.NET Core secrets / local config =====
+# Jei appsettings turi realius slaptažodžius, saugesnė praktika juos
+# laikyti per `dotnet user-secrets` arba appsettings.Local.json ir jį ignoruoti:
+appsettings.Local.json
+appsettings.*.local.json
+*.pfx
+appsettings.json
+appsettings.Development.json
+
+## ===== EF Core =====
+*.dbmdl
+
+## ===== Test results =====
+[Tt]est[Rr]esult*/
+*.trx
+coverage/
+*.coverage
+*.coveragexml
+
+## ===== Docker (jei naudosi) =====
+docker-compose.override.yml
+
+## ===== Logs =====
+*.log
+logs/
+
+## ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## ===== Misc =====
+*.tmp
+*.bak
+*.swp
