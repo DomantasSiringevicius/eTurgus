@@ -32,6 +32,7 @@ public class ProductRepository(AppDbContext dbContext) : IProductRepository
         productInDb.Price = product.Price;
         productInDb.Quantity = product.Quantity;
         productInDb.Description = product.Description;
+        productInDb.PictureUri = product.PictureUri;
         productInDb.UpdatedAt = DateTime.Now;
 
         if (productInDb.Price < 0)
