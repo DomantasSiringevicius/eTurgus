@@ -1,4 +1,6 @@
-﻿using Backend.Application.UseCases.Products.CreateProduct;
+﻿using Backend.Application.Dtos.Product;
+using Backend.Application.UseCases.Products.CreateProduct;
+using Backend.Application.UseCases.Products.UpdateProduct;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,4 +22,19 @@ public class ProductController(IMediator mediator) : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    
+    [HttpPut("{name}")]
+    public async Task<IActionResult> UpdateAsync([FromRoute] string name, [FromForm] UpdateProductDto dto)
+    {
+        try
+        {
+            var result = await mediator.Send(new UpdateProductCommand {Name = name, ProductDto = dto});
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
 }
