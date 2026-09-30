@@ -1,14 +1,16 @@
+using Backend.Domain.IRepositories;
 using Backend.Infrastructure;
+using Backend.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---- MySQL / EF Core ----
+// ---- SQLite / EF Core ----
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    options.UseSqlite(connectionString));
 
 // ---- Presentation ----
 builder.Services.AddControllers();
@@ -22,6 +24,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -30,11 +34,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// ---- Apply migrations on startup (dev convenience) ----
+// ---- Ensure database is created on startup ----
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    db.Database.EnsureCreated();
 }
 
 if (app.Environment.IsDevelopment())
