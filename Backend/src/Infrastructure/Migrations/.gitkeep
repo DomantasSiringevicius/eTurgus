@@ -1,2 +1,0 @@
-# EF Core migrations will be generated into this folder via:
-# dotnet ef migrations add InitialCreate --project src/Infrastructure --startup-project src/Presentation
