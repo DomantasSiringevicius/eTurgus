@@ -1,5 +1,6 @@
 ﻿using Backend.Application.Dtos.Shop;
 using Backend.Application.UseCases.Shops.CreateShop;
+using Backend.Application.UseCases.Shops.DeleteShop;
 using Backend.Application.UseCases.Shops.UpdateShop;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,20 @@ public class ShopController(IMediator mediator) : ControllerBase
         catch (Exception ex)
         {
             return BadRequest(ex.Message);
+        }
+    }
+    
+    [HttpDelete("{name}")]
+    public async Task<IActionResult> DeleteAsync([FromRoute] string name)
+    {
+        try
+        {
+            var result = await mediator.Send(new DeleteShopCommand() { Name = name });
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
         }
     }
 }
