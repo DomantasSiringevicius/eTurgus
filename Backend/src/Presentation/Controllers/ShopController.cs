@@ -1,6 +1,9 @@
 ﻿using Backend.Application.Dtos.Shop;
+using Backend.Application.UseCases.Products.GetAllProducts;
 using Backend.Application.UseCases.Shops.CreateShop;
 using Backend.Application.UseCases.Shops.DeleteShop;
+using Backend.Application.UseCases.Shops.GetAllShops;
+using Backend.Application.UseCases.Shops.GetShop;
 using Backend.Application.UseCases.Shops.UpdateShop;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +47,33 @@ public class ShopController(IMediator mediator) : ControllerBase
         try
         {
             var result = await mediator.Send(new DeleteShopCommand() { Name = name });
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+    [HttpGet("{name}")]
+    public async Task<IActionResult> GetByNameAsync([FromRoute] string name)
+    {
+        try
+        {
+            var result = await mediator.Send(new GetShopQuery(name));
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllAsync()
+    {
+        try
+        {
+            var result = await mediator.Send(new GetAllShopsQuery());
             return Ok(result);
         }
         catch (Exception e)
