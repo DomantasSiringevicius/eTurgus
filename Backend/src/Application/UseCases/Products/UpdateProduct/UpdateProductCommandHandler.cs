@@ -17,6 +17,7 @@ public class UpdateProductCommandHandler(IProductRepository productRepository)
         product.Quantity = command.ProductDto.Quantity;
         product.Description = command.ProductDto.Description;
         product.PictureUri = command.ProductDto.PictureUri;
+        product.ShopId = command.ProductDto.ShopId;
         
         var updateProduct = await productRepository.UpdateAsync(product);
 
@@ -31,7 +32,8 @@ public class UpdateProductCommandHandler(IProductRepository productRepository)
             Price = updateProduct.Price,
             Quantity = updateProduct.Quantity,
             Description = updateProduct.Description,
-            PictureUri = updateProduct.PictureUri!
+            PictureUri = updateProduct.PictureUri!,
+            ShopId = updateProduct.ShopId
         };
     }
 

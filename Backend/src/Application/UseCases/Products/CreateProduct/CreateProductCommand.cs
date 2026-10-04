@@ -13,5 +13,7 @@ public class CreateProductCommand : IRequest<string?>
     public required string Description { get; set; }
     
     public required string PictureUri { get; set; }
+    
+    public required Guid ShopId { get; set; }
 }
 
