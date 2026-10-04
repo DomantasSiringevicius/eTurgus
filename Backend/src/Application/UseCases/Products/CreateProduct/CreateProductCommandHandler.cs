@@ -33,6 +33,7 @@ public class CreateProductCommandHandler(IProductRepository productRepository) :
             Price = command.Price,
             Quantity = command.Quantity,
             PictureUri = command.PictureUri,
+            ShopId = command.ShopId,
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now,
         };
