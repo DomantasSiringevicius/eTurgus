@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Backend.Application.UseCases.Products.GetProduct;
 
-public class GetProductQuery(string name) : IRequest<ProductDto>, IRequest<Product>
+public class GetProductQuery(string name) : IRequest<Product>
 {
     public string Name { get; } = name;
 }
