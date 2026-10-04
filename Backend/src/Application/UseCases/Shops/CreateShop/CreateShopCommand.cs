@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Backend.Application.UseCases.Shops.CreateShop;
 
-public class CreateShopCommand : IRequest<string?>
+public class CreateShopCommand : IRequest<ShopDto>
 {
     public required string Name { get; set; }
     

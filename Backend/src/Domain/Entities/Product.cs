@@ -15,4 +15,6 @@ public class Product : Entity
     public required Guid ShopId { get; set; }
     
     public Shop Shop { get; set; } = null!;
+    
+    public List<Review> Reviews { get; set; } = new List<Review>();
 }

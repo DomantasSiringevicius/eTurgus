@@ -1,12 +1,13 @@
-﻿using Backend.Domain.Entities;
+﻿using Backend.Application.Dtos.Shop;
+using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
 
 namespace Backend.Application.UseCases.Shops.CreateShop;
 
-public class CreateShopCommandHandler(IShopRepository shopRepository) : IRequestHandler<CreateShopCommand, string?>
+public class CreateShopCommandHandler(IShopRepository shopRepository) : IRequestHandler<CreateShopCommand, ShopDto>
 {
-    public async Task<string?> Handle(CreateShopCommand command, CancellationToken cancellationToken)
+    public async Task<ShopDto> Handle(CreateShopCommand command, CancellationToken cancellationToken)
     {
         var shopInDb = await shopRepository.GetByNameAsync(command.Name);
         
@@ -29,6 +30,13 @@ public class CreateShopCommandHandler(IShopRepository shopRepository) : IRequest
 
         await shopRepository.CreateAsync(shop);
         
-        return shop.Name;
+        return new ShopDto
+        {
+            Id = shop.Id,
+            Name = shop.Name,
+            Description = shop.Description,
+            ContactEmail = shop.ContactEmail,
+            ContactPhone = shop.ContactPhone
+        };
     }
 }
