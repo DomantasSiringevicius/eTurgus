@@ -11,26 +11,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Product>()
-            .HasIndex(p => p.Name)
-            .IsUnique();
-        
-        modelBuilder.Entity<Shop>()
-            .HasIndex(s => s.Name)
-            .IsUnique();
+        modelBuilder.Entity<Shop>(e =>
+        {
+            e.HasIndex(s => s.Name).IsUnique();
 
-        modelBuilder.Entity<Shop>()
-            .HasMany(s => s.Products)
-            .WithOne(p => p.Shop)
-            .HasForeignKey(p => p.ShopId)
-            .OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(s => s.Products)
+                .WithOne(p => p.Shop)
+                .HasForeignKey(p => p.ShopId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
-        modelBuilder.Entity<Product>()
-            .HasMany(p => p.Reviews)
-            .WithOne(r => r.Product)
-            .HasForeignKey(r => r.ProductId)
-            .OnDelete(DeleteBehavior.Cascade);
-        
+        modelBuilder.Entity<Product>(e =>
+        {
+            e.HasIndex(p => new { p.ShopId, p.Name }).IsUnique();
+            e.Property(p => p.Price).HasPrecision(18, 2);
+
+            e.HasMany(p => p.Reviews)
+                .WithOne(r => r.Product)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
     
 
