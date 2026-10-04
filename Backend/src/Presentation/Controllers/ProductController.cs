@@ -1,7 +1,9 @@
 ﻿using Backend.Application.Dtos.Product;
 using Backend.Application.UseCases.Products.CreateProduct;
 using Backend.Application.UseCases.Products.DeleteProduct;
+using Backend.Application.UseCases.Products.GetAllProducts;
 using Backend.Application.UseCases.Products.UpdateProduct;
+using Backend.Application.UseCases.Products.GetProduct;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,6 +46,34 @@ public class ProductController(IMediator mediator) : ControllerBase
         try
         {
             var result = await mediator.Send(new DeleteProductCommand { Name = name });
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
+    [HttpGet("{name}")]
+    public async Task<IActionResult> GetByNameAsync([FromRoute] string name)
+    {
+        try
+        {
+            var result = await mediator.Send(new GetProductQuery(name));
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllAsync()
+    {
+        try
+        {
+            var result = await mediator.Send(new GetAllProductsQuery());
             return Ok(result);
         }
         catch (Exception e)
