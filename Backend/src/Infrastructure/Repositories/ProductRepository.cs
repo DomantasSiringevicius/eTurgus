@@ -42,16 +42,6 @@ public class ProductRepository(AppDbContext dbContext) : IProductRepository
         productInDb.ShopId = product.ShopId;
         productInDb.UpdatedAt = DateTime.Now;
 
-        if (productInDb.Price < 0)
-        {
-            throw new Exception("Price cannot be negative");
-        }
-
-        if (productInDb.Quantity < 0)
-        {
-            throw new Exception("Quantity cannot be negative");
-        }
-        
         await dbContext.SaveChangesAsync();
         
         return productInDb;

@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos.Review;
+﻿using Backend.Application.Exceptions;
+using Backend.Application.Dtos.Review;
 using Backend.Domain.IRepositories;
 using MediatR;
 
@@ -10,7 +11,7 @@ public class GetReviewQueryHandler(IReviewRepository reviewRepository)
     public async Task<ReviewDto> Handle(GetReviewQuery query, CancellationToken cancellationToken)
     {
         var review = await reviewRepository.GetByIdAsync(query.ShopId, query.ProductId, query.Id)
-               ?? throw new Exception($"Review with id '{query.Id}' not found for product '{query.ProductId}'.");
+               ?? throw new NotFoundException($"Review with id '{query.Id}' not found for product '{query.ProductId}'.");
 
         return new ReviewDto
         {

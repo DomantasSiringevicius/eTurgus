@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos.Product;
+﻿using Backend.Application.Exceptions;
+using Backend.Application.Dtos.Product;
 using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
@@ -14,24 +15,24 @@ public class CreateProductCommandHandler(IProductRepository productRepository, I
 
         if (shop is null)
         {
-            throw new Exception($"Shop with id '{command.ShopId}' not found.");
+            throw new NotFoundException($"Shop with id '{command.ShopId}' not found.");
         }
 
         var productInDb = await productRepository.GetByNameAsync(command.ShopId, command.Name);
 
         if(productInDb is not null)
         {
-            throw new Exception($"Product with name '{command.Name}' already exists in this shop.");
+            throw new ConflictException($"Product with name '{command.Name}' already exists in this shop.");
         }
 
-        if (command.Price < 0)
+        if (command.Price <= 0)
         {
-            throw new Exception("Price cannot be negative");
+            throw new ValidationException("Price must be greater than 0");
         }
 
         if (command.Quantity < 0)
         {
-            throw new Exception("Quantity cannot be negative");
+            throw new ValidationException("Quantity cannot be negative");
         }
 
         var product = new Product

@@ -1,4 +1,5 @@
 ﻿using Backend.Application.Dtos.Shop;
+using Backend.Application.Exceptions;
 using Backend.Application.UseCases.Products.GetAllProducts;
 using Backend.Application.UseCases.Shops.CreateShop;
 using Backend.Application.UseCases.Shops.DeleteShop;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
 
+[ApiController]
 [Route("api/shops")]
 public class ShopController(IMediator mediator) : ControllerBase
 {
@@ -22,11 +24,11 @@ public class ShopController(IMediator mediator) : ControllerBase
         {
             var result = await mediator.Send(command);
             result.Links = LinkFactory.ForShop(result.Id);
-            return Ok(result);
+            return Created($"/api/shops/{result.Id}", result);
         }
-        catch (Exception ex)
+        catch (ConflictException ex)
         {
-            return BadRequest(ex.Message);
+            return Conflict(ex.Message);
         }
     }
 
@@ -39,9 +41,13 @@ public class ShopController(IMediator mediator) : ControllerBase
             result.Links = LinkFactory.ForShop(result.Id);
             return Ok(result);
         }
-        catch (Exception ex)
+        catch (NotFoundException ex)
         {
-            return BadRequest(ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (ConflictException ex)
+        {
+            return Conflict(ex.Message);
         }
     }
     
@@ -50,12 +56,12 @@ public class ShopController(IMediator mediator) : ControllerBase
     {
         try
         {
-            var result = await mediator.Send(new DeleteShopCommand() { Id = shopId });
-            return Ok(result);
+            await mediator.Send(new DeleteShopCommand() { Id = shopId });
+            return NoContent();
         }
-        catch (Exception e)
+        catch (NotFoundException ex)
         {
-            return BadRequest(e.Message);
+            return NotFound(ex.Message);
         }
     }
     [HttpGet("{shopId:guid}")]
@@ -67,9 +73,9 @@ public class ShopController(IMediator mediator) : ControllerBase
             result.Links = LinkFactory.ForShop(result.Id);
             return Ok(result);
         }
-        catch (Exception e)
+        catch (NotFoundException ex)
         {
-            return NotFound(e.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -82,9 +88,9 @@ public class ShopController(IMediator mediator) : ControllerBase
             result.Links = LinkFactory.ForShopSummary(result.Id);
             return Ok(result);
         }
-        catch (Exception e)
+        catch (NotFoundException ex)
         {
-            return NotFound(e.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -99,20 +105,13 @@ public class ShopController(IMediator mediator) : ControllerBase
             return BadRequest("page must be >= 1 and pageSize must be between 1 and 50.");
         }
 
-        try
+        var result = await mediator.Send(new GetAllShopsQuery { Page = page, PageSize = pageSize, Search = search });
+        foreach (var item in result.Items)
         {
-            var result = await mediator.Send(new GetAllShopsQuery { Page = page, PageSize = pageSize, Search = search });
-            foreach (var item in result.Items)
-            {
-                item.Links = LinkFactory.ForShop(item.Id);
-            }
+            item.Links = LinkFactory.ForShop(item.Id);
+        }
 
-            result.Links = LinkFactory.ForPage(Request, result.Page, result.TotalPages);
-            return Ok(result);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
+        result.Links = LinkFactory.ForPage(Request, result.Page, result.TotalPages);
+        return Ok(result);
     }
 }

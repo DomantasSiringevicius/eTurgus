@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos;
+﻿using Backend.Application.Exceptions;
+using Backend.Application.Dtos;
 using Backend.Application.Dtos.Product;
 using Backend.Domain.IRepositories;
 using MediatR;
@@ -11,7 +12,7 @@ public class GetAllProductsQueryHandler(IProductRepository productRepository, IS
     public async Task<PagedResult<ProductDto>> Handle(GetAllProductsQuery query, CancellationToken cancellationToken)
     {
         var shop = await shopRepository.GetByIdAsync(query.ShopId)
-               ?? throw new Exception($"Shop with id '{query.ShopId}' not found.");
+               ?? throw new NotFoundException($"Shop with id '{query.ShopId}' not found.");
 
         var (products, totalCount) = await productRepository.GetPagedAsync(
             shop.Id, query.Page, query.PageSize, query.Search, query.MinPrice, query.MaxPrice);

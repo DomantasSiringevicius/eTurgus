@@ -1,4 +1,5 @@
-﻿using Backend.Domain.Entities;
+﻿using Backend.Application.Exceptions;
+using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
 
@@ -12,14 +13,14 @@ public class DeleteProductCommandHandler(IProductRepository productRepository) :
 
         if(product is null)
         {
-            throw new Exception($"Product with id '{command.ProductId}' not found in shop '{command.ShopId}'.");
+            throw new NotFoundException($"Product with id '{command.ProductId}' not found in shop '{command.ShopId}'.");
         }
 
         var deletedProduct = await productRepository.DeleteAsync(product);
 
         if(deletedProduct is null)
         {
-            throw new Exception($"Failed to delete product with id '{command.ProductId}'.");
+            throw new NotFoundException($"Failed to delete product with id '{command.ProductId}'.");
         }
 
         return deletedProduct;

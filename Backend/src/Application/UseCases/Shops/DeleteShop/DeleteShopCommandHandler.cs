@@ -1,4 +1,5 @@
-﻿using Backend.Domain.IRepositories;
+﻿using Backend.Application.Exceptions;
+using Backend.Domain.IRepositories;
 using MediatR;
 
 namespace Backend.Application.UseCases.Shops.DeleteShop;
@@ -12,7 +13,7 @@ public class DeleteShopCommandHandler(IShopRepository shopRepository)
 
         if (shop is null)
         {
-            throw new Exception($"Shop with id '{command.Id}' not found.");
+            throw new NotFoundException($"Shop with id '{command.Id}' not found.");
         }
 
         var result = await shopRepository.DeleteAsync(shop);

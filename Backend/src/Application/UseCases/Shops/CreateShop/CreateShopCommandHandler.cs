@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos.Shop;
+﻿using Backend.Application.Exceptions;
+using Backend.Application.Dtos.Shop;
 using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
@@ -13,7 +14,7 @@ public class CreateShopCommandHandler(IShopRepository shopRepository) : IRequest
         
         if (shopInDb is not null)
         {
-            throw new Exception($"Shop with name '{command.Name}' already exists.");
+            throw new ConflictException($"Shop with name '{command.Name}' already exists.");
         }
 
         var shop = new Shop
