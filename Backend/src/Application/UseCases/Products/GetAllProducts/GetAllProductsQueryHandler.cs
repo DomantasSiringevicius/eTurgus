@@ -11,7 +11,8 @@ public class GetAllProductsQueryHandler(IProductRepository productRepository)
 {
     public async Task<PagedResult<ProductDto>> Handle(GetAllProductsQuery query, CancellationToken cancellationToken)
     {
-        var (products, totalCount) = await productRepository.GetPagedAsync(query.Page, query.PageSize);
+        var (products, totalCount) = await productRepository.GetPagedAsync(
+            query.Page, query.PageSize, query.Search, query.MinPrice, query.MaxPrice, query.ShopId);
 
         return new PagedResult<ProductDto>
         {

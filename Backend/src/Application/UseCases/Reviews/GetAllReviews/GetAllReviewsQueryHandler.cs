@@ -10,7 +10,8 @@ public class GetAllReviewsQueryHandler(IReviewRepository reviewRepository)
 {
     public async Task<PagedResult<ReviewDto>> Handle(GetAllReviewsQuery query, CancellationToken cancellationToken)
     {
-        var (reviews, totalCount) = await reviewRepository.GetPagedAsync(query.Page, query.PageSize);
+        var (reviews, totalCount) = await reviewRepository.GetPagedAsync(
+            query.Page, query.PageSize, query.MinRating, query.ProductId);
 
         return new PagedResult<ReviewDto>
         {

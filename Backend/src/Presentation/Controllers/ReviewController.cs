@@ -69,16 +69,31 @@ public class ReviewController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAllAsync(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] int? minRating = null,
+        [FromQuery] Guid? productId = null)
     {
         if (page < 1 || pageSize < 1 || pageSize > 50)
         {
             return BadRequest("page must be >= 1 and pageSize must be between 1 and 50.");
         }
 
+        if (minRating < 1 || minRating > 5)
+        {
+            return BadRequest("minRating must be between 1 and 5.");
+        }
+
         try
         {
-            var result = await mediator.Send(new GetAllReviewsQuery { Page = page, PageSize = pageSize });
+            var result = await mediator.Send(new GetAllReviewsQuery
+            {
+                Page = page,
+                PageSize = pageSize,
+                MinRating = minRating,
+                ProductId = productId
+            });
             return Ok(result);
         }
         catch (Exception e)

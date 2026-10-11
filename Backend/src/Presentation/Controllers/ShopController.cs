@@ -69,7 +69,10 @@ public class ShopController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAllAsync(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null)
     {
         if (page < 1 || pageSize < 1 || pageSize > 50)
         {
@@ -78,7 +81,7 @@ public class ShopController(IMediator mediator) : ControllerBase
 
         try
         {
-            var result = await mediator.Send(new GetAllShopsQuery { Page = page, PageSize = pageSize });
+            var result = await mediator.Send(new GetAllShopsQuery { Page = page, PageSize = pageSize, Search = search });
             return Ok(result);
         }
         catch (Exception e)

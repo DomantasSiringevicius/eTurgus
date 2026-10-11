@@ -71,11 +71,34 @@ public class ProductRepository(AppDbContext dbContext) : IProductRepository
         return await dbContext.Products.ToListAsync();
     }
     
-    public async Task<(List<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize)
+    public async Task<(List<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search,
+        decimal? minPrice, decimal? maxPrice, Guid? shopId)
     {
-        var totalCount = await dbContext.Products.CountAsync();
+        var query = dbContext.Products.AsQueryable();
 
-        var items = await dbContext.Products
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(p => p.Name.ToLower().Contains(search.ToLower()));
+        }
+
+        if (minPrice is not null)
+        {
+            query = query.Where(p => p.Price >= minPrice);
+        }
+
+        if (maxPrice is not null)
+        {
+            query = query.Where(p => p.Price <= maxPrice);
+        }
+
+        if (shopId is not null)
+        {
+            query = query.Where(p => p.ShopId == shopId);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
             .OrderBy(p => p.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

@@ -10,5 +10,5 @@ public interface IReviewRepository
     Task<List<Review>> GetAllAsync();
     Task<Review?> UpdateAsync(Review review);
     Task<Review?> DeleteAsync(Review review);
-    Task<(List<Review> Items, int TotalCount)> GetPagedAsync(int page, int pageSize);
+    Task<(List<Review> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, int? minRating, Guid? productId);
 }
