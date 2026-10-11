@@ -9,5 +9,5 @@ public interface IShopRepository
     Task<List<Shop>> GetAllAsync();
     Task<Shop?> UpdateAsync(Shop shop);
     Task<Shop?> DeleteAsync(Shop shop);
-    Task<(List<Shop> Items, int TotalCount)> GetPagedAsync(int page, int pageSize);
+    Task<(List<Shop> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search);
 }

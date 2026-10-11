@@ -53,11 +53,23 @@ public class ReviewRepository(AppDbContext dbContext) : IReviewRepository
         return reviewInDb;
     }
     
-    public async Task<(List<Review> Items, int TotalCount)> GetPagedAsync(int page, int pageSize)
+    public async Task<(List<Review> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, int? minRating, Guid? productId)
     {
-        var totalCount = await dbContext.Reviews.CountAsync();
+        var query = dbContext.Reviews.AsQueryable();
 
-        var items = await dbContext.Reviews
+        if (minRating is not null)
+        {
+            query = query.Where(r => r.Rating >= minRating);
+        }
+
+        if (productId is not null)
+        {
+            query = query.Where(r => r.ProductId == productId);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
             .OrderBy(r => r.CreatedAt)
             .ThenBy(r => r.Id)
             .Skip((page - 1) * pageSize)

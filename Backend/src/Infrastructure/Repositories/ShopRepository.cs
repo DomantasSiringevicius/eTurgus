@@ -59,11 +59,18 @@ public class ShopRepository(AppDbContext dbContext) : IShopRepository
         return shopInDb;
     }
     
-    public async Task<(List<Shop> Items, int TotalCount)> GetPagedAsync(int page, int pageSize)
+    public async Task<(List<Shop> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search)
     {
-        var totalCount = await dbContext.Shops.CountAsync();
+        var query = dbContext.Shops.AsQueryable();
 
-        var items = await dbContext.Shops
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(s => s.Name.ToLower().Contains(search.ToLower()));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
             .OrderBy(s => s.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

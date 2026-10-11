@@ -10,7 +10,7 @@ public class GetAllShopsQueryHandler(IShopRepository shopRepository)
 {
     public async Task<PagedResult<ShopDto>> Handle(GetAllShopsQuery query, CancellationToken cancellationToken)
     {
-        var (shops, totalCount) = await shopRepository.GetPagedAsync(query.Page, query.PageSize);
+        var (shops, totalCount) = await shopRepository.GetPagedAsync(query.Page, query.PageSize, query.Search);
 
         return new PagedResult<ShopDto>
         {
