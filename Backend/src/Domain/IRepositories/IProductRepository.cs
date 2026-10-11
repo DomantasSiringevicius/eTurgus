@@ -13,4 +13,5 @@ public interface IProductRepository
     Task<Product?> DeleteAsync(Product product);
     
     Task<List<Product>> GetAllAsync();
+    Task<(List<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize);
 }

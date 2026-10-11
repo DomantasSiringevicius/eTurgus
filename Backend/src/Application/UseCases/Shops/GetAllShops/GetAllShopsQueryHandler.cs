@@ -1,23 +1,30 @@
-﻿using Backend.Application.Dtos.Shop;
+﻿using Backend.Application.Dtos;
+using Backend.Application.Dtos.Shop;
 using Backend.Domain.IRepositories;
 using MediatR;
 
 namespace Backend.Application.UseCases.Shops.GetAllShops;
 
 public class GetAllShopsQueryHandler(IShopRepository shopRepository)
-    : IRequestHandler<GetAllShopsQuery, List<ShopDto>>
+    : IRequestHandler<GetAllShopsQuery, PagedResult<ShopDto>>
 {
-    public async Task<List<ShopDto>> Handle(GetAllShopsQuery query, CancellationToken cancellationToken)
+    public async Task<PagedResult<ShopDto>> Handle(GetAllShopsQuery query, CancellationToken cancellationToken)
     {
-        var shops = await shopRepository.GetAllAsync();
+        var (shops, totalCount) = await shopRepository.GetPagedAsync(query.Page, query.PageSize);
 
-        return shops.Select(shop => new ShopDto
+        return new PagedResult<ShopDto>
         {
-            Id = shop.Id,
-            Name = shop.Name,
-            Description = shop.Description,
-            ContactEmail = shop.ContactEmail,
-            ContactPhone = shop.ContactPhone
-        }).ToList();
+            Items = shops.Select(shop => new ShopDto
+            {
+                Id = shop.Id,
+                Name = shop.Name,
+                Description = shop.Description,
+                ContactEmail = shop.ContactEmail,
+                ContactPhone = shop.ContactPhone
+            }).ToList(),
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalCount = totalCount
+        };
     }
 }

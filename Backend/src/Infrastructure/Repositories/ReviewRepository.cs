@@ -52,4 +52,18 @@ public class ReviewRepository(AppDbContext dbContext) : IReviewRepository
         await dbContext.SaveChangesAsync();
         return reviewInDb;
     }
+    
+    public async Task<(List<Review> Items, int TotalCount)> GetPagedAsync(int page, int pageSize)
+    {
+        var totalCount = await dbContext.Reviews.CountAsync();
+
+        var items = await dbContext.Reviews
+            .OrderBy(r => r.CreatedAt)
+            .ThenBy(r => r.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
 }

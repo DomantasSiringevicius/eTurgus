@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos.Product;
+﻿using Backend.Application.Dtos;
+using Backend.Application.Dtos.Product;
 using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
@@ -6,20 +7,26 @@ using MediatR;
 namespace Backend.Application.UseCases.Products.GetAllProducts;
 
 public class GetAllProductsQueryHandler(IProductRepository productRepository)
-    : IRequestHandler<GetAllProductsQuery, List<ProductDto>>
+    : IRequestHandler<GetAllProductsQuery, PagedResult<ProductDto>>
 {
-    public async Task<List<ProductDto>> Handle(GetAllProductsQuery query, CancellationToken cancellationToken)
+    public async Task<PagedResult<ProductDto>> Handle(GetAllProductsQuery query, CancellationToken cancellationToken)
     {
-        var products = await productRepository.GetAllAsync();
+        var (products, totalCount) = await productRepository.GetPagedAsync(query.Page, query.PageSize);
 
-        return products.Select(product => new ProductDto
+        return new PagedResult<ProductDto>
         {
-            Name = product.Name,
-            Price = product.Price,
-            Quantity = product.Quantity,
-            Description = product.Description,
-            PictureUri = product.PictureUri ?? string.Empty,
-            ShopId = product.ShopId
-        }).ToList();
+            Items = products.Select(product => new ProductDto
+            {
+                Name = product.Name,
+                Price = product.Price,
+                Quantity = product.Quantity,
+                Description = product.Description,
+                PictureUri = product.PictureUri ?? string.Empty,
+                ShopId = product.ShopId
+            }).ToList(),
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalCount = totalCount
+        };
     }
 }

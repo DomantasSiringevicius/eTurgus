@@ -70,4 +70,17 @@ public class ProductRepository(AppDbContext dbContext) : IProductRepository
     {
         return await dbContext.Products.ToListAsync();
     }
+    
+    public async Task<(List<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize)
+    {
+        var totalCount = await dbContext.Products.CountAsync();
+
+        var items = await dbContext.Products
+            .OrderBy(p => p.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
 }
