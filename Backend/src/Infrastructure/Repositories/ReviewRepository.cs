@@ -74,4 +74,14 @@ public class ReviewRepository(AppDbContext dbContext) : IReviewRepository
 
         return (items, totalCount);
     }
+
+    public async Task<(int Count, double? AverageRating)> GetStatsByShopAsync(Guid shopId)
+    {
+        var reviews = dbContext.Reviews.Where(r => r.Product.ShopId == shopId);
+
+        var count = await reviews.CountAsync();
+        var averageRating = await reviews.Select(r => (double?)r.Rating).AverageAsync();
+
+        return (count, averageRating);
+    }
 }

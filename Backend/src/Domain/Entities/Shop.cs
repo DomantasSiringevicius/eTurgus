@@ -6,8 +6,6 @@ public class Shop : Entity
     
     public required string Description { get; set; }
     
-    //public required string OwnerId { get; set; } TODO: Add user entity
-    
     public required string ContactEmail { get; set; }
     
     public required string ContactPhone { get; set; } 

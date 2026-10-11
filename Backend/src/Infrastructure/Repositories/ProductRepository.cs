@@ -107,4 +107,14 @@ public class ProductRepository(AppDbContext dbContext) : IProductRepository
 
         return (items, totalCount);
     }
+
+    public async Task<(int Count, int TotalQuantity)> GetStatsByShopAsync(Guid shopId)
+    {
+        var products = dbContext.Products.Where(p => p.ShopId == shopId);
+
+        var count = await products.CountAsync();
+        var totalQuantity = await products.SumAsync(p => p.Quantity);
+
+        return (count, totalQuantity);
+    }
 }

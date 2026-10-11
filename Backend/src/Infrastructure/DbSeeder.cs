@@ -97,7 +97,6 @@ public static class DbSeeder
         AddProduct(crafts, "Žvakė su sojų vašku", "Kvapioji žvakė, degimo laikas apie 40 val.", 8.50m, 50,
             ("Malonus kvapas", "Kvapas nestiprus, bet jaukus, dega tolygiai.", 4, "Eglė"));
 
-        // 3. Elektronikos parduotuvė
         var tech = AddShop(
             "TechKampas",
             "Naudingi priedai ir elektronika kasdienybei.",
@@ -115,7 +114,7 @@ public static class DbSeeder
         AddProduct(tech, "Telefono laikiklis automobiliui", "Tvirtinamas prie ventiliacijos groteliu.", 11.20m, 45,
             ("Veikia, bet dreba", "Ant nelygaus kelio telefonas šiek tiek vibruoja.", 3, "Vytautas"));
 
-        db.Shops.AddRange(shops);       // kartu įrašo ir produktus per Shop.Products
+        db.Shops.AddRange(shops);
         db.Reviews.AddRange(reviews);
 
         await db.SaveChangesAsync();
