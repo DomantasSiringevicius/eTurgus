@@ -9,8 +9,8 @@ public class UpdateReviewCommandHandler(IReviewRepository reviewRepository)
 {
     public async Task<ReviewDto> Handle(UpdateReviewCommand command, CancellationToken cancellationToken)
     {
-        var review = await reviewRepository.GetByIdAsync(command.Id)
-               ?? throw new Exception($"Review with id '{command.Id}' not found.");
+        var review = await reviewRepository.GetByIdAsync(command.ShopId, command.ProductId, command.Id)
+               ?? throw new Exception($"Review with id '{command.Id}' not found for product '{command.ProductId}'.");
 
         review.Title = command.ReviewDto.Title;
         review.Content = command.ReviewDto.Content;

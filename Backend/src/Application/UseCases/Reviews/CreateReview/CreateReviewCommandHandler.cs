@@ -10,8 +10,9 @@ public class CreateReviewCommandHandler(IReviewRepository reviewRepository, IPro
 {
     public async Task<ReviewDto> Handle(CreateReviewCommand command, CancellationToken cancellationToken)
     {
-        var product = await productRepository.GetAllAsync(); 
-       
+        var product = await productRepository.GetByIdAsync(command.ShopId, command.ProductId)
+               ?? throw new Exception($"Product with id '{command.ProductId}' not found in shop '{command.ShopId}'.");
+
         var review = new Review
         {
             Id = Guid.NewGuid(),
@@ -19,7 +20,7 @@ public class CreateReviewCommandHandler(IReviewRepository reviewRepository, IPro
             Content = command.Content,
             Rating = command.Rating,
             Author = command.Author,
-            ProductId = command.ProductId,
+            ProductId = product.Id,
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now
         };

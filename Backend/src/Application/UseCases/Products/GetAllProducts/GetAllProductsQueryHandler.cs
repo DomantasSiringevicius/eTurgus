@@ -1,23 +1,26 @@
 ﻿using Backend.Application.Dtos;
 using Backend.Application.Dtos.Product;
-using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
 
 namespace Backend.Application.UseCases.Products.GetAllProducts;
 
-public class GetAllProductsQueryHandler(IProductRepository productRepository)
+public class GetAllProductsQueryHandler(IProductRepository productRepository, IShopRepository shopRepository)
     : IRequestHandler<GetAllProductsQuery, PagedResult<ProductDto>>
 {
     public async Task<PagedResult<ProductDto>> Handle(GetAllProductsQuery query, CancellationToken cancellationToken)
     {
+        var shop = await shopRepository.GetByIdAsync(query.ShopId)
+               ?? throw new Exception($"Shop with id '{query.ShopId}' not found.");
+
         var (products, totalCount) = await productRepository.GetPagedAsync(
-            query.Page, query.PageSize, query.Search, query.MinPrice, query.MaxPrice, query.ShopId);
+            shop.Id, query.Page, query.PageSize, query.Search, query.MinPrice, query.MaxPrice);
 
         return new PagedResult<ProductDto>
         {
             Items = products.Select(product => new ProductDto
             {
+                Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
                 Quantity = product.Quantity,

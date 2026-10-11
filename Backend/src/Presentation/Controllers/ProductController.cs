@@ -4,20 +4,30 @@ using Backend.Application.UseCases.Products.DeleteProduct;
 using Backend.Application.UseCases.Products.GetAllProducts;
 using Backend.Application.UseCases.Products.UpdateProduct;
 using Backend.Application.UseCases.Products.GetProduct;
+using Backend.Presentation.Hypermedia;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/shops/{shopId:guid}/products")]
 public class ProductController(IMediator mediator) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromForm] CreateProductCommand command)
+    public async Task<IActionResult> CreateAsync([FromRoute] Guid shopId, [FromForm] CreateProductDto dto)
     {
         try
         {
-            var result = await mediator.Send(command);
+            var result = await mediator.Send(new CreateProductCommand
+            {
+                Name = dto.Name,
+                Price = dto.Price,
+                Quantity = dto.Quantity,
+                Description = dto.Description,
+                PictureUri = dto.PictureUri,
+                ShopId = shopId
+            });
+            result.Links = LinkFactory.ForProduct(result.ShopId, result.Id);
             return Ok(result);
         }
         catch (Exception ex)
@@ -26,12 +36,19 @@ public class ProductController(IMediator mediator) : ControllerBase
         }
     }
     
-    [HttpPut("{name}")]
-    public async Task<IActionResult> UpdateAsync([FromRoute] string name, [FromForm] UpdateProductDto dto)
+    [HttpPut("{productId:guid}")]
+    public async Task<IActionResult> UpdateAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
+        [FromForm] UpdateProductDto dto)
     {
         try
         {
-            var result = await mediator.Send(new UpdateProductCommand {Name = name, ProductDto = dto});
+            var result = await mediator.Send(new UpdateProductCommand
+            {
+                ShopId = shopId,
+                ProductId = productId,
+                ProductDto = dto
+            });
+            result.Links = LinkFactory.ForProduct(result.ShopId, result.Id);
             return Ok(result);
         }
         catch (Exception ex)
@@ -40,12 +57,12 @@ public class ProductController(IMediator mediator) : ControllerBase
         }
     }
 
-    [HttpDelete("{name}")]
-    public async Task<IActionResult> DeleteAsync([FromRoute] string name)
+    [HttpDelete("{productId:guid}")]
+    public async Task<IActionResult> DeleteAsync([FromRoute] Guid shopId, [FromRoute] Guid productId)
     {
         try
         {
-            var result = await mediator.Send(new DeleteProductCommand { Name = name });
+            var result = await mediator.Send(new DeleteProductCommand { ShopId = shopId, ProductId = productId });
             return Ok(result);
         }
         catch (Exception e)
@@ -54,12 +71,13 @@ public class ProductController(IMediator mediator) : ControllerBase
         }
     }
 
-    [HttpGet("{name}")]
-    public async Task<IActionResult> GetByNameAsync([FromRoute] string name)
+    [HttpGet("{productId:guid}")]
+    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid shopId, [FromRoute] Guid productId)
     {
         try
         {
-            var result = await mediator.Send(new GetProductQuery(name));
+            var result = await mediator.Send(new GetProductQuery(shopId, productId));
+            result.Links = LinkFactory.ForProduct(result.ShopId, result.Id);
             return Ok(result);
         }
         catch (Exception e)
@@ -70,12 +88,12 @@ public class ProductController(IMediator mediator) : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetAllAsync(
+        [FromRoute] Guid shopId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? search = null,
         [FromQuery] decimal? minPrice = null,
-        [FromQuery] decimal? maxPrice = null,
-        [FromQuery] Guid? shopId = null)
+        [FromQuery] decimal? maxPrice = null)
     {
         if (page < 1 || pageSize < 1 || pageSize > 50)
         {
@@ -91,13 +109,19 @@ public class ProductController(IMediator mediator) : ControllerBase
         {
             var result = await mediator.Send(new GetAllProductsQuery
             {
+                ShopId = shopId,
                 Page = page,
                 PageSize = pageSize,
                 Search = search,
                 MinPrice = minPrice,
-                MaxPrice = maxPrice,
-                ShopId = shopId
+                MaxPrice = maxPrice
             });
+            foreach (var item in result.Items)
+            {
+                item.Links = LinkFactory.ForProduct(item.ShopId, item.Id);
+            }
+
+            result.Links = LinkFactory.ForPage(Request, result.Page, result.TotalPages);
             return Ok(result);
         }
         catch (Exception e)

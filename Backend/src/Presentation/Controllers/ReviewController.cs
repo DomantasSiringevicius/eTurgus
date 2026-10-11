@@ -4,20 +4,31 @@ using Backend.Application.UseCases.Reviews.DeleteReview;
 using Backend.Application.UseCases.Reviews.GetAllReviews;
 using Backend.Application.UseCases.Reviews.GetReview;
 using Backend.Application.UseCases.Reviews.UpdateReview;
+using Backend.Presentation.Hypermedia;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/shops/{shopId:guid}/products/{productId:guid}/reviews")]
 public class ReviewController(IMediator mediator) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromForm] CreateReviewCommand command)
+    public async Task<IActionResult> CreateAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
+        [FromForm] CreateReviewDto dto)
     {
         try
         {
-            var result = await mediator.Send(command);
+            var result = await mediator.Send(new CreateReviewCommand
+            {
+                Title = dto.Title,
+                Content = dto.Content,
+                Rating = dto.Rating,
+                Author = dto.Author,
+                ShopId = shopId,
+                ProductId = productId
+            });
+            result.Links = LinkFactory.ForReview(shopId, result.ProductId, result.Id);
             return Ok(result);
         }
         catch (Exception ex)
@@ -26,12 +37,20 @@ public class ReviewController(IMediator mediator) : ControllerBase
         }
     }
     
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync([FromRoute] Guid id, [FromForm] UpdateReviewDto dto)
+    [HttpPut("{reviewId:guid}")]
+    public async Task<IActionResult> UpdateAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
+        [FromRoute] Guid reviewId, [FromForm] UpdateReviewDto dto)
     {
         try
         {
-            var result = await mediator.Send(new UpdateReviewCommand() { Id = id, ReviewDto = dto });
+            var result = await mediator.Send(new UpdateReviewCommand()
+            {
+                ShopId = shopId,
+                ProductId = productId,
+                Id = reviewId,
+                ReviewDto = dto
+            });
+            result.Links = LinkFactory.ForReview(shopId, result.ProductId, result.Id);
             return Ok(result);
         }
         catch (Exception ex)
@@ -40,12 +59,18 @@ public class ReviewController(IMediator mediator) : ControllerBase
         }
     }
     
-    [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
+    [HttpDelete("{reviewId:guid}")]
+    public async Task<IActionResult> DeleteAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
+        [FromRoute] Guid reviewId)
     {
         try
         {
-            var result = await mediator.Send(new DeleteReviewCommand() { Id = id });
+            var result = await mediator.Send(new DeleteReviewCommand()
+            {
+                ShopId = shopId,
+                ProductId = productId,
+                Id = reviewId
+            });
             return Ok(result);
         }
         catch (Exception e)
@@ -54,12 +79,14 @@ public class ReviewController(IMediator mediator) : ControllerBase
         }
     }
     
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
+    [HttpGet("{reviewId:guid}")]
+    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
+        [FromRoute] Guid reviewId)
     {
         try
         {
-            var result = await mediator.Send(new GetReviewQuery(id));
+            var result = await mediator.Send(new GetReviewQuery(shopId, productId, reviewId));
+            result.Links = LinkFactory.ForReview(shopId, result.ProductId, result.Id);
             return Ok(result);
         }
         catch (Exception e)
@@ -70,10 +97,11 @@ public class ReviewController(IMediator mediator) : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetAllAsync(
+        [FromRoute] Guid shopId,
+        [FromRoute] Guid productId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
-        [FromQuery] int? minRating = null,
-        [FromQuery] Guid? productId = null)
+        [FromQuery] int? minRating = null)
     {
         if (page < 1 || pageSize < 1 || pageSize > 50)
         {
@@ -89,11 +117,18 @@ public class ReviewController(IMediator mediator) : ControllerBase
         {
             var result = await mediator.Send(new GetAllReviewsQuery
             {
+                ShopId = shopId,
+                ProductId = productId,
                 Page = page,
                 PageSize = pageSize,
-                MinRating = minRating,
-                ProductId = productId
+                MinRating = minRating
             });
+            foreach (var item in result.Items)
+            {
+                item.Links = LinkFactory.ForReview(shopId, item.ProductId, item.Id);
+            }
+
+            result.Links = LinkFactory.ForPage(Request, result.Page, result.TotalPages);
             return Ok(result);
         }
         catch (Exception e)

@@ -5,13 +5,16 @@ using MediatR;
 
 namespace Backend.Application.UseCases.Reviews.GetAllReviews;
 
-public class GetAllReviewsQueryHandler(IReviewRepository reviewRepository)
+public class GetAllReviewsQueryHandler(IReviewRepository reviewRepository, IProductRepository productRepository)
     : IRequestHandler<GetAllReviewsQuery, PagedResult<ReviewDto>>
 {
     public async Task<PagedResult<ReviewDto>> Handle(GetAllReviewsQuery query, CancellationToken cancellationToken)
     {
+        var product = await productRepository.GetByIdAsync(query.ShopId, query.ProductId)
+               ?? throw new Exception($"Product with id '{query.ProductId}' not found in shop '{query.ShopId}'.");
+
         var (reviews, totalCount) = await reviewRepository.GetPagedAsync(
-            query.Page, query.PageSize, query.MinRating, query.ProductId);
+            product.Id, query.Page, query.PageSize, query.MinRating);
 
         return new PagedResult<ReviewDto>
         {

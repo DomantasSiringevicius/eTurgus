@@ -9,8 +9,8 @@ public class GetShopQueryHandler(IShopRepository shopRepository)
 {
     public async Task<ShopDto> Handle(GetShopQuery query, CancellationToken cancellationToken)
     {
-        var shop = await shopRepository.GetByNameAsync(query.Name)
-               ?? throw new Exception($"Shop with name '{query.Name}' not found.");
+        var shop = await shopRepository.GetByIdAsync(query.Id)
+               ?? throw new Exception($"Shop with id '{query.Id}' not found.");
 
         return new ShopDto
         {

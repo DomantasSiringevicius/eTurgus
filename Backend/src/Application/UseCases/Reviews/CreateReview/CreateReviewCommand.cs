@@ -13,5 +13,7 @@ public class CreateReviewCommand : IRequest<ReviewDto>
     
     public required string Author { get; set; }
     
+    public required Guid ShopId { get; set; }
+
     public required Guid ProductId { get; set; }
 }

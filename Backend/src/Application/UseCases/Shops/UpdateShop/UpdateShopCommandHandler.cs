@@ -10,11 +10,11 @@ public class UpdateShopCommandHandler(IShopRepository shopRepository)
 {
     public async Task<ShopDto> Handle(UpdateShopCommand command, CancellationToken cancellationToken)
     {
-        var shop = await shopRepository.GetByNameAsync(command.Name);
+        var shop = await shopRepository.GetByIdAsync(command.Id);
 
         if (shop is null)
         {
-            throw new Exception($"Shop with name '{command.Name}' not found.");
+            throw new Exception($"Shop with id '{command.Id}' not found.");
         }
 
         shop.Name = command.ShopDto.Name;

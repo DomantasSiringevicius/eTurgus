@@ -14,9 +14,15 @@ public class ProductRepository(AppDbContext dbContext) : IProductRepository
         return newProduct.Name;
     }
 
-    public async Task<Product?> GetByNameAsync(string name)
+    public async Task<Product?> GetByIdAsync(Guid shopId, Guid productId)
     {
-       return await dbContext.Products.FirstOrDefaultAsync(p => p.Name.ToLower().Equals(name.ToLower()));
+        return await dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId && p.ShopId == shopId);
+    }
+
+    public async Task<Product?> GetByNameAsync(Guid shopId, string name)
+    {
+       return await dbContext.Products.FirstOrDefaultAsync(p =>
+           p.ShopId == shopId && p.Name.ToLower().Equals(name.ToLower()));
     }
 
     public async Task<Product?> UpdateAsync(Product product)
@@ -71,10 +77,10 @@ public class ProductRepository(AppDbContext dbContext) : IProductRepository
         return await dbContext.Products.ToListAsync();
     }
     
-    public async Task<(List<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search,
-        decimal? minPrice, decimal? maxPrice, Guid? shopId)
+    public async Task<(List<Product> Items, int TotalCount)> GetPagedAsync(Guid shopId, int page, int pageSize,
+        string? search, decimal? minPrice, decimal? maxPrice)
     {
-        var query = dbContext.Products.AsQueryable();
+        var query = dbContext.Products.Where(p => p.ShopId == shopId);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -89,11 +95,6 @@ public class ProductRepository(AppDbContext dbContext) : IProductRepository
         if (maxPrice is not null)
         {
             query = query.Where(p => p.Price <= maxPrice);
-        }
-
-        if (shopId is not null)
-        {
-            query = query.Where(p => p.ShopId == shopId);
         }
 
         var totalCount = await query.CountAsync();

@@ -1,30 +1,39 @@
-﻿using Backend.Domain.Entities;
+﻿using Backend.Application.Dtos.Product;
+using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
 
 namespace Backend.Application.UseCases.Products.CreateProduct;
 
-public class CreateProductCommandHandler(IProductRepository productRepository) : IRequestHandler<CreateProductCommand, string?>
+public class CreateProductCommandHandler(IProductRepository productRepository, IShopRepository shopRepository)
+    : IRequestHandler<CreateProductCommand, ProductDto>
 {
-    public async Task<string?> Handle(CreateProductCommand command, CancellationToken cancellationToken)
+    public async Task<ProductDto> Handle(CreateProductCommand command, CancellationToken cancellationToken)
     {
-        var productInDb = await productRepository.GetByNameAsync(command.Name);
-        
+        var shop = await shopRepository.GetByIdAsync(command.ShopId);
+
+        if (shop is null)
+        {
+            throw new Exception($"Shop with id '{command.ShopId}' not found.");
+        }
+
+        var productInDb = await productRepository.GetByNameAsync(command.ShopId, command.Name);
+
         if(productInDb is not null)
         {
-            throw new Exception($"Product with name '{command.Name}' already exists.");
+            throw new Exception($"Product with name '{command.Name}' already exists in this shop.");
         }
 
         if (command.Price < 0)
         {
             throw new Exception("Price cannot be negative");
         }
-        
+
         if (command.Quantity < 0)
         {
             throw new Exception("Quantity cannot be negative");
         }
-        
+
         var product = new Product
         {
             Id = Guid.NewGuid(),
@@ -38,8 +47,17 @@ public class CreateProductCommandHandler(IProductRepository productRepository) :
             UpdatedAt = DateTime.Now,
         };
 
-       var result = await productRepository.CreateAsync(product);
-       
-       return result;
+        await productRepository.CreateAsync(product);
+
+        return new ProductDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Price = product.Price,
+            Quantity = product.Quantity,
+            Description = product.Description,
+            PictureUri = product.PictureUri ?? string.Empty,
+            ShopId = product.ShopId
+        };
     }
 }

@@ -6,12 +6,14 @@ public interface IProductRepository
 {
     Task<string?> CreateAsync(Product product);
     
-    Task<Product?> GetByNameAsync(string name);
+    Task<Product?> GetByIdAsync(Guid shopId, Guid productId);
+    
+    Task<Product?> GetByNameAsync(Guid shopId, string name);
     
     Task<Product?> UpdateAsync(Product updatedProduct);
     
     Task<Product?> DeleteAsync(Product product);
     
     Task<List<Product>> GetAllAsync();
-    Task<(List<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search, decimal? minPrice, decimal? maxPrice, Guid? shopId);
+    Task<(List<Product> Items, int TotalCount)> GetPagedAsync(Guid shopId, int page, int pageSize, string? search, decimal? minPrice, decimal? maxPrice);
 }

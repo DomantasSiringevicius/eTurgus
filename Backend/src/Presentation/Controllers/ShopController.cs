@@ -5,12 +5,13 @@ using Backend.Application.UseCases.Shops.DeleteShop;
 using Backend.Application.UseCases.Shops.GetAllShops;
 using Backend.Application.UseCases.Shops.GetShop;
 using Backend.Application.UseCases.Shops.UpdateShop;
+using Backend.Presentation.Hypermedia;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/shops")]
 public class ShopController(IMediator mediator) : ControllerBase
 {
     [HttpPost]
@@ -19,6 +20,7 @@ public class ShopController(IMediator mediator) : ControllerBase
         try
         {
             var result = await mediator.Send(command);
+            result.Links = LinkFactory.ForShop(result.Id);
             return Ok(result);
         }
         catch (Exception ex)
@@ -27,12 +29,13 @@ public class ShopController(IMediator mediator) : ControllerBase
         }
     }
 
-    [HttpPut("{name}")]
-    public async Task<IActionResult> UpdateAsync([FromRoute] string name, [FromForm] UpdateShopDto dto)
+    [HttpPut("{shopId:guid}")]
+    public async Task<IActionResult> UpdateAsync([FromRoute] Guid shopId, [FromForm] UpdateShopDto dto)
     {
         try
         {
-            var result = await mediator.Send(new UpdateShopCommand() { Name = name, ShopDto = dto });
+            var result = await mediator.Send(new UpdateShopCommand() { Id = shopId, ShopDto = dto });
+            result.Links = LinkFactory.ForShop(result.Id);
             return Ok(result);
         }
         catch (Exception ex)
@@ -41,12 +44,12 @@ public class ShopController(IMediator mediator) : ControllerBase
         }
     }
     
-    [HttpDelete("{name}")]
-    public async Task<IActionResult> DeleteAsync([FromRoute] string name)
+    [HttpDelete("{shopId:guid}")]
+    public async Task<IActionResult> DeleteAsync([FromRoute] Guid shopId)
     {
         try
         {
-            var result = await mediator.Send(new DeleteShopCommand() { Name = name });
+            var result = await mediator.Send(new DeleteShopCommand() { Id = shopId });
             return Ok(result);
         }
         catch (Exception e)
@@ -54,12 +57,13 @@ public class ShopController(IMediator mediator) : ControllerBase
             return BadRequest(e.Message);
         }
     }
-    [HttpGet("{name}")]
-    public async Task<IActionResult> GetByNameAsync([FromRoute] string name)
+    [HttpGet("{shopId:guid}")]
+    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid shopId)
     {
         try
         {
-            var result = await mediator.Send(new GetShopQuery(name));
+            var result = await mediator.Send(new GetShopQuery(shopId));
+            result.Links = LinkFactory.ForShop(result.Id);
             return Ok(result);
         }
         catch (Exception e)
@@ -82,6 +86,12 @@ public class ShopController(IMediator mediator) : ControllerBase
         try
         {
             var result = await mediator.Send(new GetAllShopsQuery { Page = page, PageSize = pageSize, Search = search });
+            foreach (var item in result.Items)
+            {
+                item.Links = LinkFactory.ForShop(item.Id);
+            }
+
+            result.Links = LinkFactory.ForPage(Request, result.Page, result.TotalPages);
             return Ok(result);
         }
         catch (Exception e)

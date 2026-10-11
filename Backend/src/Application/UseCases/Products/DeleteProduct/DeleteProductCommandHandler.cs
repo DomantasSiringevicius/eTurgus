@@ -8,18 +8,18 @@ public class DeleteProductCommandHandler(IProductRepository productRepository) :
 {
     public async Task<Product> Handle(DeleteProductCommand command, CancellationToken cancellationToken)
     {
-        var product = await productRepository.GetByNameAsync(command.Name);
-        
+        var product = await productRepository.GetByIdAsync(command.ShopId, command.ProductId);
+
         if(product is null)
         {
-            throw new Exception($"Product with name '{command.Name}' not found.");
+            throw new Exception($"Product with id '{command.ProductId}' not found in shop '{command.ShopId}'.");
         }
-        
+
         var deletedProduct = await productRepository.DeleteAsync(product);
-        
+
         if(deletedProduct is null)
         {
-            throw new Exception($"Failed to delete product with name '{command.Name}'.");
+            throw new Exception($"Failed to delete product with id '{command.ProductId}'.");
         }
 
         return deletedProduct;
