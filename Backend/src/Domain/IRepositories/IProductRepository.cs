@@ -15,5 +15,6 @@ public interface IProductRepository
     Task<Product?> DeleteAsync(Product product);
     
     Task<List<Product>> GetAllAsync();
+    Task<(int Count, int TotalQuantity)> GetStatsByShopAsync(Guid shopId);
     Task<(List<Product> Items, int TotalCount)> GetPagedAsync(Guid shopId, int page, int pageSize, string? search, decimal? minPrice, decimal? maxPrice);
 }

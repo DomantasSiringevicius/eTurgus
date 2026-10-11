@@ -14,7 +14,20 @@ public static class LinkFactory
             new LinkDto { Rel = "self", Href = self, Method = "GET" },
             new LinkDto { Rel = "update", Href = self, Method = "PUT" },
             new LinkDto { Rel = "delete", Href = self, Method = "DELETE" },
-            new LinkDto { Rel = "products", Href = $"{self}/products", Method = "GET" }
+            new LinkDto { Rel = "products", Href = $"{self}/products", Method = "GET" },
+            new LinkDto { Rel = "summary", Href = $"{self}/summary", Method = "GET" }
+        };
+    }
+
+    public static List<LinkDto> ForShopSummary(Guid shopId)
+    {
+        var shop = $"/api/shops/{shopId}";
+
+        return new List<LinkDto>
+        {
+            new LinkDto { Rel = "self", Href = $"{shop}/summary", Method = "GET" },
+            new LinkDto { Rel = "shop", Href = shop, Method = "GET" },
+            new LinkDto { Rel = "products", Href = $"{shop}/products", Method = "GET" }
         };
     }
 
@@ -71,7 +84,6 @@ public static class LinkFactory
         return links;
     }
 
-    // Keeps the current filters and pageSize, only swaps the page number.
     private static string PageHref(HttpRequest request, int page)
     {
         var query = request.Query.ToDictionary(

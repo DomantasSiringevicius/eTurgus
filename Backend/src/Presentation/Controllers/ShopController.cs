@@ -4,6 +4,7 @@ using Backend.Application.UseCases.Shops.CreateShop;
 using Backend.Application.UseCases.Shops.DeleteShop;
 using Backend.Application.UseCases.Shops.GetAllShops;
 using Backend.Application.UseCases.Shops.GetShop;
+using Backend.Application.UseCases.Shops.GetShopSummary;
 using Backend.Application.UseCases.Shops.UpdateShop;
 using Backend.Presentation.Hypermedia;
 using MediatR;
@@ -64,6 +65,21 @@ public class ShopController(IMediator mediator) : ControllerBase
         {
             var result = await mediator.Send(new GetShopQuery(shopId));
             result.Links = LinkFactory.ForShop(result.Id);
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
+    }
+
+    [HttpGet("{shopId:guid}/summary")]
+    public async Task<IActionResult> GetSummaryAsync([FromRoute] Guid shopId)
+    {
+        try
+        {
+            var result = await mediator.Send(new GetShopSummaryQuery(shopId));
+            result.Links = LinkFactory.ForShopSummary(result.Id);
             return Ok(result);
         }
         catch (Exception e)
