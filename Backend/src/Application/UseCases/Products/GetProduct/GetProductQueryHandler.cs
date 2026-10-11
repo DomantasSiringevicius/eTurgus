@@ -1,5 +1,4 @@
 ﻿using Backend.Application.Dtos.Product;
-using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
 
@@ -10,11 +9,12 @@ public class GetProductQueryHandler(IProductRepository productRepository)
 {
     public async Task<ProductDto> Handle(GetProductQuery query, CancellationToken cancellationToken)
     {
-        var product = await productRepository.GetByNameAsync(query.Name)
-               ?? throw new Exception($"Product with name '{query.Name}' not found.");
+        var product = await productRepository.GetByIdAsync(query.ShopId, query.ProductId)
+               ?? throw new Exception($"Product with id '{query.ProductId}' not found in shop '{query.ShopId}'.");
 
         return new ProductDto
         {
+            Id = product.Id,
             Name = product.Name,
             Price = product.Price,
             Quantity = product.Quantity,

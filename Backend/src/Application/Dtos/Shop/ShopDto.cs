@@ -11,4 +11,6 @@ public class ShopDto
     public required string ContactEmail { get; set; }
     
     public required string ContactPhone { get; set; }
+
+    public List<LinkDto> Links { get; set; } = new List<LinkDto>();
 }

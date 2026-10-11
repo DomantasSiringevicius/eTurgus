@@ -8,11 +8,11 @@ public class DeleteShopCommandHandler(IShopRepository shopRepository)
 {
     public async Task<string?> Handle(DeleteShopCommand command, CancellationToken cancellationToken)
     {
-        var shop = await shopRepository.GetByNameAsync(command.Name);
+        var shop = await shopRepository.GetByIdAsync(command.Id);
 
         if (shop is null)
         {
-            throw new Exception($"Shop with name '{command.Name}' not found.");
+            throw new Exception($"Shop with id '{command.Id}' not found.");
         }
 
         var result = await shopRepository.DeleteAsync(shop);

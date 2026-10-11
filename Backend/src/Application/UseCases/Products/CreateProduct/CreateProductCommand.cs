@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using Backend.Application.Dtos.Product;
+using MediatR;
 
 namespace Backend.Application.UseCases.Products.CreateProduct;
 
-public class CreateProductCommand : IRequest<string?>
+public class CreateProductCommand : IRequest<ProductDto>
 {
     public required string Name { get; set; }
     

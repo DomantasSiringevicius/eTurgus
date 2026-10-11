@@ -14,6 +14,11 @@ public class ShopRepository(AppDbContext dbContext) : IShopRepository
         return newShop.Name;
     }
 
+    public async Task<Shop?> GetByIdAsync(Guid id)
+    {
+        return await dbContext.Shops.FirstOrDefaultAsync(s => s.Id == id);
+    }
+
     public async Task<Shop?> GetByNameAsync(string name)
     {
         return await dbContext.Shops.FirstOrDefaultAsync(s => s.Name.ToLower().Equals(name.ToLower()));

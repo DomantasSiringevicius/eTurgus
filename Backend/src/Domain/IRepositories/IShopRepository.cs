@@ -5,6 +5,7 @@ namespace Backend.Domain.IRepositories;
 public interface IShopRepository
 {
     Task<string?> CreateAsync(Shop shop);
+    Task<Shop?> GetByIdAsync(Guid id);
     Task<Shop?> GetByNameAsync(string name);
     Task<List<Shop>> GetAllAsync();
     Task<Shop?> UpdateAsync(Shop shop);

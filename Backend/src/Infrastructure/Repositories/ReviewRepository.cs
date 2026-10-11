@@ -13,9 +13,10 @@ public class ReviewRepository(AppDbContext dbContext) : IReviewRepository
         return review.Id;
     }
 
-    public async Task<Review?> GetByIdAsync(Guid id)
+    public async Task<Review?> GetByIdAsync(Guid shopId, Guid productId, Guid reviewId)
     {
-        return await dbContext.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+        return await dbContext.Reviews.FirstOrDefaultAsync(r =>
+            r.Id == reviewId && r.ProductId == productId && r.Product.ShopId == shopId);
     }
 
     public async Task<List<Review>> GetByProductIdAsync(Guid productId)
@@ -53,18 +54,13 @@ public class ReviewRepository(AppDbContext dbContext) : IReviewRepository
         return reviewInDb;
     }
     
-    public async Task<(List<Review> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, int? minRating, Guid? productId)
+    public async Task<(List<Review> Items, int TotalCount)> GetPagedAsync(Guid productId, int page, int pageSize, int? minRating)
     {
-        var query = dbContext.Reviews.AsQueryable();
+        var query = dbContext.Reviews.Where(r => r.ProductId == productId);
 
         if (minRating is not null)
         {
             query = query.Where(r => r.Rating >= minRating);
-        }
-
-        if (productId is not null)
-        {
-            query = query.Where(r => r.ProductId == productId);
         }
 
         var totalCount = await query.CountAsync();

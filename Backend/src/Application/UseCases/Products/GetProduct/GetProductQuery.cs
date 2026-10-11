@@ -1,10 +1,11 @@
 ﻿using Backend.Application.Dtos.Product;
-using Backend.Domain.Entities;
 using MediatR;
 
 namespace Backend.Application.UseCases.Products.GetProduct;
 
-public class GetProductQuery(string name) : IRequest<ProductDto>
+public class GetProductQuery(Guid shopId, Guid productId) : IRequest<ProductDto>
 {
-    public string Name { get; } = name;
+    public Guid ShopId { get; } = shopId;
+
+    public Guid ProductId { get; } = productId;
 }

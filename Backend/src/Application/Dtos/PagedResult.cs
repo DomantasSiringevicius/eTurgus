@@ -7,4 +7,5 @@ public class PagedResult<T>
     public required int PageSize { get; set; }
     public required int TotalCount { get; set; }
     public int TotalPages => (int) Math.Ceiling((double) TotalCount / PageSize);
+    public List<LinkDto> Links { get; set; } = new List<LinkDto>();
 }

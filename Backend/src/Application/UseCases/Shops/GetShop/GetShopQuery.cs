@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Backend.Application.UseCases.Shops.GetShop;
 
-public class GetShopQuery(string name) : IRequest<ShopDto>
+public class GetShopQuery(Guid id) : IRequest<ShopDto>
 {
-    public string Name { get; } = name;
+    public Guid Id { get; } = id;
 }

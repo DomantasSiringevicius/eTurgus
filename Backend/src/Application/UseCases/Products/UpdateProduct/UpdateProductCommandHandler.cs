@@ -11,14 +11,13 @@ public class UpdateProductCommandHandler(IProductRepository productRepository)
     public async Task<ProductDto> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
     {
         var product = await ValidateAsync(command);
-        
+
         product.Name = command.ProductDto.Name;
         product.Price = command.ProductDto.Price;
         product.Quantity = command.ProductDto.Quantity;
         product.Description = command.ProductDto.Description;
         product.PictureUri = command.ProductDto.PictureUri;
-        product.ShopId = command.ProductDto.ShopId;
-        
+
         var updateProduct = await productRepository.UpdateAsync(product);
 
         if (updateProduct is null)
@@ -28,6 +27,7 @@ public class UpdateProductCommandHandler(IProductRepository productRepository)
 
         return new ProductDto
         {
+            Id = updateProduct.Id,
             Name = updateProduct.Name,
             Price = updateProduct.Price,
             Quantity = updateProduct.Quantity,
@@ -39,11 +39,11 @@ public class UpdateProductCommandHandler(IProductRepository productRepository)
 
     private async Task<Product> ValidateAsync(UpdateProductCommand command)
     {
-        var product = await productRepository.GetByNameAsync(command.Name);
+        var product = await productRepository.GetByIdAsync(command.ShopId, command.ProductId);
 
         if (product is null)
         {
-            throw new Exception($"Product with name '{command.Name}' not found.");
+            throw new Exception($"Product with id '{command.ProductId}' not found in shop '{command.ShopId}'.");
         }
 
         return product;
