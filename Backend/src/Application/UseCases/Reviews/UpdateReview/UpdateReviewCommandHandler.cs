@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos.Review;
+﻿using Backend.Application.Exceptions;
+using Backend.Application.Dtos.Review;
 using Backend.Domain.IRepositories;
 using MediatR;
 
@@ -10,7 +11,12 @@ public class UpdateReviewCommandHandler(IReviewRepository reviewRepository)
     public async Task<ReviewDto> Handle(UpdateReviewCommand command, CancellationToken cancellationToken)
     {
         var review = await reviewRepository.GetByIdAsync(command.ShopId, command.ProductId, command.Id)
-               ?? throw new Exception($"Review with id '{command.Id}' not found for product '{command.ProductId}'.");
+               ?? throw new NotFoundException($"Review with id '{command.Id}' not found for product '{command.ProductId}'.");
+
+        if (command.ReviewDto.Rating < 1 || command.ReviewDto.Rating > 5)
+        {
+            throw new ValidationException("Rating must be between 1 and 5.");
+        }
 
         review.Title = command.ReviewDto.Title;
         review.Content = command.ReviewDto.Content;
@@ -22,7 +28,7 @@ public class UpdateReviewCommandHandler(IReviewRepository reviewRepository)
 
         if (updatedReview == null)
         {
-            throw new Exception("Error updating review");
+            throw new NotFoundException("Error updating review");
         }
 
         return new ReviewDto

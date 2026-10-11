@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos.Product;
+﻿using Backend.Application.Exceptions;
+using Backend.Application.Dtos.Product;
 using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
@@ -22,7 +23,7 @@ public class UpdateProductCommandHandler(IProductRepository productRepository)
 
         if (updateProduct is null)
         {
-            throw new Exception("Product not found");
+            throw new NotFoundException("Product not found");
         }
 
         return new ProductDto
@@ -43,7 +44,24 @@ public class UpdateProductCommandHandler(IProductRepository productRepository)
 
         if (product is null)
         {
-            throw new Exception($"Product with id '{command.ProductId}' not found in shop '{command.ShopId}'.");
+            throw new NotFoundException($"Product with id '{command.ProductId}' not found in shop '{command.ShopId}'.");
+        }
+
+        var productWithSameName = await productRepository.GetByNameAsync(command.ShopId, command.ProductDto.Name);
+
+        if (productWithSameName is not null && productWithSameName.Id != product.Id)
+        {
+            throw new ConflictException($"Product with name '{command.ProductDto.Name}' already exists in this shop.");
+        }
+
+        if (command.ProductDto.Price <= 0)
+        {
+            throw new ValidationException("Price must be greater than 0");
+        }
+
+        if (command.ProductDto.Quantity < 0)
+        {
+            throw new ValidationException("Quantity cannot be negative");
         }
 
         return product;

@@ -1,4 +1,5 @@
 ﻿using Backend.Application.Dtos.Review;
+using Backend.Application.Exceptions;
 using Backend.Application.UseCases.Reviews.CreateReview;
 using Backend.Application.UseCases.Reviews.DeleteReview;
 using Backend.Application.UseCases.Reviews.GetAllReviews;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
 
+[ApiController]
 [Route("api/shops/{shopId:guid}/products/{productId:guid}/reviews")]
 public class ReviewController(IMediator mediator) : ControllerBase
 {
@@ -29,11 +31,15 @@ public class ReviewController(IMediator mediator) : ControllerBase
                 ProductId = productId
             });
             result.Links = LinkFactory.ForReview(shopId, result.ProductId, result.Id);
-            return Ok(result);
+            return Created($"/api/shops/{shopId}/products/{result.ProductId}/reviews/{result.Id}", result);
         }
-        catch (Exception ex)
+        catch (NotFoundException ex)
         {
-            return BadRequest(ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (ValidationException ex)
+        {
+            return UnprocessableEntity(ex.Message);
         }
     }
     
@@ -53,9 +59,13 @@ public class ReviewController(IMediator mediator) : ControllerBase
             result.Links = LinkFactory.ForReview(shopId, result.ProductId, result.Id);
             return Ok(result);
         }
-        catch (Exception ex)
+        catch (NotFoundException ex)
         {
-            return BadRequest(ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (ValidationException ex)
+        {
+            return UnprocessableEntity(ex.Message);
         }
     }
     
@@ -65,17 +75,17 @@ public class ReviewController(IMediator mediator) : ControllerBase
     {
         try
         {
-            var result = await mediator.Send(new DeleteReviewCommand()
+            await mediator.Send(new DeleteReviewCommand()
             {
                 ShopId = shopId,
                 ProductId = productId,
                 Id = reviewId
             });
-            return Ok(result);
+            return NoContent();
         }
-        catch (Exception e)
+        catch (NotFoundException ex)
         {
-            return BadRequest(e.Message);
+            return NotFound(ex.Message);
         }
     }
     
@@ -89,9 +99,9 @@ public class ReviewController(IMediator mediator) : ControllerBase
             result.Links = LinkFactory.ForReview(shopId, result.ProductId, result.Id);
             return Ok(result);
         }
-        catch (Exception e)
+        catch (NotFoundException ex)
         {
-            return NotFound(e.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -131,9 +141,9 @@ public class ReviewController(IMediator mediator) : ControllerBase
             result.Links = LinkFactory.ForPage(Request, result.Page, result.TotalPages);
             return Ok(result);
         }
-        catch (Exception e)
+        catch (NotFoundException ex)
         {
-            return BadRequest(e.Message);
+            return NotFound(ex.Message);
         }
     }
 }

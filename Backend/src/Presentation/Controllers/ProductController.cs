@@ -1,4 +1,5 @@
 ﻿using Backend.Application.Dtos.Product;
+using Backend.Application.Exceptions;
 using Backend.Application.UseCases.Products.CreateProduct;
 using Backend.Application.UseCases.Products.DeleteProduct;
 using Backend.Application.UseCases.Products.GetAllProducts;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
 
+[ApiController]
 [Route("api/shops/{shopId:guid}/products")]
 public class ProductController(IMediator mediator) : ControllerBase
 {
@@ -28,11 +30,19 @@ public class ProductController(IMediator mediator) : ControllerBase
                 ShopId = shopId
             });
             result.Links = LinkFactory.ForProduct(result.ShopId, result.Id);
-            return Ok(result);
+            return Created($"/api/shops/{result.ShopId}/products/{result.Id}", result);
         }
-        catch (Exception ex)
+        catch (NotFoundException ex)
         {
-            return BadRequest(ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (ConflictException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (ValidationException ex)
+        {
+            return UnprocessableEntity(ex.Message);
         }
     }
     
@@ -51,9 +61,17 @@ public class ProductController(IMediator mediator) : ControllerBase
             result.Links = LinkFactory.ForProduct(result.ShopId, result.Id);
             return Ok(result);
         }
-        catch (Exception ex)
+        catch (NotFoundException ex)
         {
-            return BadRequest(ex.Message);
+            return NotFound(ex.Message);
+        }
+        catch (ConflictException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (ValidationException ex)
+        {
+            return UnprocessableEntity(ex.Message);
         }
     }
 
@@ -62,12 +80,12 @@ public class ProductController(IMediator mediator) : ControllerBase
     {
         try
         {
-            var result = await mediator.Send(new DeleteProductCommand { ShopId = shopId, ProductId = productId });
-            return Ok(result);
+            await mediator.Send(new DeleteProductCommand { ShopId = shopId, ProductId = productId });
+            return NoContent();
         }
-        catch (Exception e)
+        catch (NotFoundException ex)
         {
-            return BadRequest(e.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -80,9 +98,9 @@ public class ProductController(IMediator mediator) : ControllerBase
             result.Links = LinkFactory.ForProduct(result.ShopId, result.Id);
             return Ok(result);
         }
-        catch (Exception e)
+        catch (NotFoundException ex)
         {
-            return NotFound(e.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -124,9 +142,9 @@ public class ProductController(IMediator mediator) : ControllerBase
             result.Links = LinkFactory.ForPage(Request, result.Page, result.TotalPages);
             return Ok(result);
         }
-        catch (Exception e)
+        catch (NotFoundException ex)
         {
-            return BadRequest(e.Message);
+            return NotFound(ex.Message);
         }
     }
     

@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos.Shop;
+﻿using Backend.Application.Exceptions;
+using Backend.Application.Dtos.Shop;
 using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
@@ -14,7 +15,14 @@ public class UpdateShopCommandHandler(IShopRepository shopRepository)
 
         if (shop is null)
         {
-            throw new Exception($"Shop with id '{command.Id}' not found.");
+            throw new NotFoundException($"Shop with id '{command.Id}' not found.");
+        }
+
+        var shopWithSameName = await shopRepository.GetByNameAsync(command.ShopDto.Name);
+
+        if (shopWithSameName is not null && shopWithSameName.Id != shop.Id)
+        {
+            throw new ConflictException($"Shop with name '{command.ShopDto.Name}' already exists.");
         }
 
         shop.Name = command.ShopDto.Name;
@@ -27,7 +35,7 @@ public class UpdateShopCommandHandler(IShopRepository shopRepository)
 
         if (updatedShop is null)
         {
-            throw new Exception("Shop not found");
+            throw new NotFoundException("Shop not found");
         }
 
         return new ShopDto

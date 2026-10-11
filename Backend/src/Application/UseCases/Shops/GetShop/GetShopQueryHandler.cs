@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos.Shop;
+﻿using Backend.Application.Exceptions;
+using Backend.Application.Dtos.Shop;
 using Backend.Domain.IRepositories;
 using MediatR;
 
@@ -10,7 +11,7 @@ public class GetShopQueryHandler(IShopRepository shopRepository)
     public async Task<ShopDto> Handle(GetShopQuery query, CancellationToken cancellationToken)
     {
         var shop = await shopRepository.GetByIdAsync(query.Id)
-               ?? throw new Exception($"Shop with id '{query.Id}' not found.");
+               ?? throw new NotFoundException($"Shop with id '{query.Id}' not found.");
 
         return new ShopDto
         {

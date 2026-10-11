@@ -1,5 +1,4 @@
 ﻿using Backend.Application.Dtos;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace Backend.Presentation.Hypermedia;
 
@@ -62,14 +61,10 @@ public static class LinkFactory
 
     public static List<LinkDto> ForPage(HttpRequest request, int page, int totalPages)
     {
-        var lastPage = Math.Max(totalPages, 1);
+        var links = new List<LinkDto>();
 
-        var links = new List<LinkDto>
-        {
-            new LinkDto { Rel = "self", Href = PageHref(request, page), Method = "GET" },
-            new LinkDto { Rel = "first", Href = PageHref(request, 1), Method = "GET" },
-            new LinkDto { Rel = "last", Href = PageHref(request, lastPage), Method = "GET" }
-        };
+        links.Add(new LinkDto { Rel = "self", Href = PageHref(request, page), Method = "GET" });
+        links.Add(new LinkDto { Rel = "first", Href = PageHref(request, 1), Method = "GET" });
 
         if (page > 1)
         {
@@ -81,15 +76,26 @@ public static class LinkFactory
             links.Add(new LinkDto { Rel = "next", Href = PageHref(request, page + 1), Method = "GET" });
         }
 
+        if (totalPages > 0)
+        {
+            links.Add(new LinkDto { Rel = "last", Href = PageHref(request, totalPages), Method = "GET" });
+        }
+
         return links;
     }
 
     private static string PageHref(HttpRequest request, int page)
     {
-        var query = request.Query.ToDictionary(
-            q => q.Key, q => (string?)q.Value.ToString(), StringComparer.OrdinalIgnoreCase);
-        query["page"] = page.ToString();
+        var href = request.Path + "?page=" + page;
 
-        return QueryHelpers.AddQueryString(request.Path.ToUriComponent(), query);
+        foreach (var parameter in request.Query)
+        {
+            if (parameter.Key.ToLower() != "page")
+            {
+                href += "&" + parameter.Key + "=" + Uri.EscapeDataString(parameter.Value.ToString());
+            }
+        }
+
+        return href;
     }
 }
