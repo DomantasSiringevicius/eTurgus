@@ -69,11 +69,16 @@ public class ProductController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetAllAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
+        if (page < 1 || pageSize < 1 || pageSize > 50)
+        {
+            return BadRequest("page must be >= 1 and pageSize must be between 1 and 50.");
+        }
+
         try
         {
-            var result = await mediator.Send(new GetAllProductsQuery());
+            var result = await mediator.Send(new GetAllProductsQuery { Page = page, PageSize = pageSize });
             return Ok(result);
         }
         catch (Exception e)

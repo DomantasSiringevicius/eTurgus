@@ -58,4 +58,17 @@ public class ShopRepository(AppDbContext dbContext) : IShopRepository
 
         return shopInDb;
     }
+    
+    public async Task<(List<Shop> Items, int TotalCount)> GetPagedAsync(int page, int pageSize)
+    {
+        var totalCount = await dbContext.Shops.CountAsync();
+
+        var items = await dbContext.Shops
+            .OrderBy(s => s.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
 }

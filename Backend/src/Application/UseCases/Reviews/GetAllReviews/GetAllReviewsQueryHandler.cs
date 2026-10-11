@@ -1,24 +1,31 @@
-﻿using Backend.Application.Dtos.Review;
+﻿using Backend.Application.Dtos;
+using Backend.Application.Dtos.Review;
 using Backend.Domain.IRepositories;
 using MediatR;
 
 namespace Backend.Application.UseCases.Reviews.GetAllReviews;
 
 public class GetAllReviewsQueryHandler(IReviewRepository reviewRepository)
-    : IRequestHandler<GetAllReviewsQuery, List<ReviewDto>>
+    : IRequestHandler<GetAllReviewsQuery, PagedResult<ReviewDto>>
 {
-    public async Task<List<ReviewDto>> Handle(GetAllReviewsQuery query, CancellationToken cancellationToken)
+    public async Task<PagedResult<ReviewDto>> Handle(GetAllReviewsQuery query, CancellationToken cancellationToken)
     {
-        var reviews = await reviewRepository.GetAllAsync();
+        var (reviews, totalCount) = await reviewRepository.GetPagedAsync(query.Page, query.PageSize);
 
-        return reviews.Select(review => new ReviewDto
+        return new PagedResult<ReviewDto>
         {
-            Id = review.Id,
-            Title = review.Title,
-            Content = review.Content,
-            Rating = review.Rating,
-            Author = review.Author,
-            ProductId = review.ProductId
-        }).ToList();
+            Items = reviews.Select(review => new ReviewDto
+            {
+                Id = review.Id,
+                Title = review.Title,
+                Content = review.Content,
+                Rating = review.Rating,
+                Author = review.Author,
+                ProductId = review.ProductId
+            }).ToList(),
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalCount = totalCount
+        };
     }
 }
