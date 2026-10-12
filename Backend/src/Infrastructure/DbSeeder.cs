@@ -114,6 +114,35 @@ public static class DbSeeder
         AddProduct(tech, "Telefono laikiklis automobiliui", "Tvirtinamas prie ventiliacijos groteliu.", 11.20m, 45,
             ("Veikia, bet dreba", "Ant nelygaus kelio telefonas šiek tiek vibruoja.", 3, "Vytautas"));
 
+        var books = AddShop(
+            "Knygų lentyna",
+            "Naujos ir skaitytos knygos visai šeimai.",
+            "labas@knygulentyna.lt",
+            "+37060000004");
+
+        AddProduct(books, "Lietuvių liaudies pasakos", "Iliustruotas pasakų rinkinys vaikams, 160 psl.", 14.90m, 22,
+            ("Vaikai klauso išsižioję", "Gražios iliustracijos, skaitome kiekvieną vakarą.", 5, "Jurga"),
+            ("Graži knyga", "Kietas viršelis, tik šriftas galėtų būti didesnis.", 4, "Andrius"));
+        AddProduct(books, "Receptų knyga „Močiutės virtuvė“", "120 tradicinių lietuviškų patiekalų receptų.", 19.50m, 14,
+            ("Tikri receptai", "Cepelinai pavyko iš pirmo karto.", 5, "Rasa"));
+        AddProduct(books, "Skaityta detektyvų kolekcija", "Penkių detektyvų rinkinys, geros būklės.", 12.00m, 6,
+            ("Geras pasiūlymas", "Knygos beveik kaip naujos, kaina puiki.", 4, "Darius"),
+            ("Trūko vienos knygos", "Atsiuntė keturias vietoj penkių, bet pardavėjas greitai ištaisė.", 3, "Simona"));
+
+        var garden = AddShop(
+            "Sodo ir daržo gėrybės",
+            "Sėklos, daigai ir įrankiai sodininkams mėgėjams.",
+            "info@sodogerybes.lt",
+            "+37060000005");
+
+        AddProduct(garden, "Pomidorų sėklos „Vilma“", "Žemaūgiai pomidorai, tinka auginti vazonuose.", 1.80m, 150,
+            ("Sudygo visos", "Per savaitę išlindo daigai, laukiu derliaus.", 5, "Ona"));
+        AddProduct(garden, "Sodo žirklės", "Aštrios žirklės šakoms iki 2 cm storio.", 15.40m, 28,
+            ("Pjauna lengvai", "Patogi rankena, ranka nepavargsta.", 5, "Kęstutis"),
+            ("Greitai atšipo", "Po sezono teko galąsti.", 3, "Vilija"));
+        AddProduct(garden, "Braškių daigai 10 vnt.", "Ankstyvos veislės daigai su šaknų gumulu.", 6.90m, 40,
+            ("Prigijo gerai", "Visi dešimt daigų prigijo, jau žydi.", 4, "Nijolė"));
+
         db.Shops.AddRange(shops);
         db.Reviews.AddRange(reviews);
 
