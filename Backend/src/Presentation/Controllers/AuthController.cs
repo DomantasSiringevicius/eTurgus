@@ -1,7 +1,10 @@
-﻿using Backend.Application.Exceptions;
+﻿using System.Security.Claims;
+using Backend.Application.Exceptions;
+using Backend.Application.UseCases.Auth.GetCurrentUser;
 using Backend.Application.UseCases.Auth.Login;
 using Backend.Application.UseCases.Auth.Register;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
@@ -39,6 +42,23 @@ public class AuthController(IMediator mediator) : ControllerBase
         catch (UnauthorizedException ex)
         {
             return Unauthorized(ex.Message);
+        }
+    }
+    
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUserAsync()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        try
+        {
+            var result = await mediator.Send(new GetCurrentUserQuery(userId));
+            return Ok(result);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
         }
     }
 }
