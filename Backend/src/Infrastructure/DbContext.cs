@@ -11,9 +11,21 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<User> Users { get; set; }
 
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(e => { e.HasIndex(u => u.Email).IsUnique(); });
+
+        modelBuilder.Entity<RefreshToken>(e =>
+        {
+            e.HasIndex(t => t.Token).IsUnique();
+
+            e.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         modelBuilder.Entity<Shop>(e =>
         {

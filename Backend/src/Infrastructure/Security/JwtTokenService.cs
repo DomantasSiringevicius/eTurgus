@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Backend.Application.Dtos.Auth;
 using Backend.Application.Interfaces;
@@ -39,6 +40,19 @@ public class JwtTokenService(JwtSettings settings) : ITokenService
         {
             AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
             ExpiresAt = expiresAt
+        };
+    }
+
+    public RefreshToken CreateRefreshToken(User user)
+    {
+        return new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            UserId = user.Id,
+            ExpiresAt = DateTime.UtcNow.AddDays(settings.RefreshTokenExpirationDays),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
     }
 }

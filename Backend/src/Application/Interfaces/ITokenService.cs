@@ -6,4 +6,6 @@ namespace Backend.Application.Interfaces;
 public interface ITokenService
 {
     TokenDto CreateAccessToken(User user);
+
+    RefreshToken CreateRefreshToken(User user);
 }
