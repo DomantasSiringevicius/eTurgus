@@ -10,4 +10,8 @@ public class UpdateProductCommand : IRequest<ProductDto>
     public required Guid ProductId { get; set; }
 
     public required UpdateProductDto ProductDto { get; set; }
+
+    public required Guid UserId { get; set; }
+
+    public required string UserRole { get; set; }
 }

@@ -18,6 +18,11 @@ public class CreateProductCommandHandler(IProductRepository productRepository, I
             throw new NotFoundException($"Shop with id '{command.ShopId}' not found.");
         }
 
+        if (shop.OwnerId != command.UserId && command.UserRole != Roles.Admin)
+        {
+            throw new ForbiddenException("Only the shop owner or an admin can change this shop.");
+        }
+
         var productInDb = await productRepository.GetByNameAsync(command.ShopId, command.Name);
 
         if(productInDb is not null)

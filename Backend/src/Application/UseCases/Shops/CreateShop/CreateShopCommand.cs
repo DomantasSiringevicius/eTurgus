@@ -12,4 +12,6 @@ public class CreateShopCommand : IRequest<ShopDto>
     public required string ContactEmail { get; set; }
     
     public required string ContactPhone { get; set; }
+    
+    public required Guid OwnerId { get; set; }
 }

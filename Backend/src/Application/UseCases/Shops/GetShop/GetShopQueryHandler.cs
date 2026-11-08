@@ -19,7 +19,8 @@ public class GetShopQueryHandler(IShopRepository shopRepository)
             Name = shop.Name,
             Description = shop.Description,
             ContactEmail = shop.ContactEmail,
-            ContactPhone = shop.ContactPhone
+            ContactPhone = shop.ContactPhone,
+            OwnerId = shop.OwnerId
         };
     }
 }

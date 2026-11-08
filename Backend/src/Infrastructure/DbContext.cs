@@ -18,6 +18,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Shop>(e =>
         {
             e.HasIndex(s => s.Name).IsUnique();
+            
+            e.HasOne(s => s.Owner)
+                .WithMany()
+                .HasForeignKey(s => s.OwnerId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             e.HasMany(s => s.Products)
                 .WithOne(p => p.Shop)

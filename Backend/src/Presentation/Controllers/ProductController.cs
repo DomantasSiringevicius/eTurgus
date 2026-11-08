@@ -6,6 +6,7 @@ using Backend.Application.UseCases.Products.DeleteProduct;
 using Backend.Application.UseCases.Products.GetAllProducts;
 using Backend.Application.UseCases.Products.UpdateProduct;
 using Backend.Application.UseCases.Products.GetProduct;
+using Backend.Presentation.Extensions;
 using Backend.Presentation.Hypermedia;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -30,10 +31,16 @@ public class ProductController(IMediator mediator) : ControllerBase
                 Quantity = dto.Quantity,
                 Description = dto.Description,
                 PictureUri = dto.PictureUri,
-                ShopId = shopId
+                ShopId = shopId,
+                UserId = User.GetUserId(),
+                UserRole = User.GetRole()
             });
             result.Links = LinkFactory.ForProduct(result.ShopId, result.Id);
             return Created($"/api/shops/{result.ShopId}/products/{result.Id}", result);
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
         }
         catch (NotFoundException ex)
         {
@@ -60,10 +67,16 @@ public class ProductController(IMediator mediator) : ControllerBase
             {
                 ShopId = shopId,
                 ProductId = productId,
-                ProductDto = dto
+                ProductDto = dto,
+                UserId = User.GetUserId(),
+                UserRole = User.GetRole()
             });
             result.Links = LinkFactory.ForProduct(result.ShopId, result.Id);
             return Ok(result);
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
         }
         catch (NotFoundException ex)
         {
@@ -85,8 +98,18 @@ public class ProductController(IMediator mediator) : ControllerBase
     {
         try
         {
-            await mediator.Send(new DeleteProductCommand { ShopId = shopId, ProductId = productId });
+            await mediator.Send(new DeleteProductCommand
+            {
+                ShopId = shopId,
+                ProductId = productId,
+                UserId = User.GetUserId(),
+                UserRole = User.GetRole()
+            });
             return NoContent();
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
         }
         catch (NotFoundException ex)
         {
