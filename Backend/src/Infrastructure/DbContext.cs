@@ -9,8 +9,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Shop> Shops { get; set; }
     public DbSet<Review> Reviews { get; set; }
 
+    public DbSet<User> Users { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>(e => { e.HasIndex(u => u.Email).IsUnique(); });
+
         modelBuilder.Entity<Shop>(e =>
         {
             e.HasIndex(s => s.Name).IsUnique();
@@ -32,6 +36,4 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }
-    
-
 }
