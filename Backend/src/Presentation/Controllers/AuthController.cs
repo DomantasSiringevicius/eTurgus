@@ -1,4 +1,5 @@
 ﻿using Backend.Application.Exceptions;
+using Backend.Application.UseCases.Auth.Login;
 using Backend.Application.UseCases.Auth.Register;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,20 @@ public class AuthController(IMediator mediator) : ControllerBase
         catch (ValidationException ex)
         {
             return UnprocessableEntity(ex.Message);
+        }
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginAsync([FromForm] LoginCommand command)
+    {
+        try
+        {
+            var result = await mediator.Send(command);
+            return Ok(result);
+        }
+        catch (UnauthorizedException ex)
+        {
+            return Unauthorized(ex.Message);
         }
     }
 }
