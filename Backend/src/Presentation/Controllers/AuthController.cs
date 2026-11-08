@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Backend.Application.Dtos.Auth;
 using Backend.Application.Exceptions;
 using Backend.Application.UseCases.Auth.GetCurrentUser;
 using Backend.Application.UseCases.Auth.Login;
@@ -14,7 +15,9 @@ namespace Backend.Presentation.Controllers;
 [Route("api/auth")]
 public class AuthController(IMediator mediator) : ControllerBase
 {
-    [HttpPost("register")]
+    private const string RefreshTokenCookie = "refreshToken";
+
+[HttpPost("register")]
     public async Task<IActionResult> RegisterAsync([FromForm] RegisterCommand command)
     {
         try
@@ -38,6 +41,7 @@ public class AuthController(IMediator mediator) : ControllerBase
         try
         {
             var result = await mediator.Send(command);
+            SetRefreshTokenCookie(result);
             return Ok(result);
         }
         catch (UnauthorizedException ex)
@@ -45,13 +49,21 @@ public class AuthController(IMediator mediator) : ControllerBase
             return Unauthorized(ex.Message);
         }
     }
-    
+
     [HttpPost("refresh")]
-    public async Task<IActionResult> RefreshAsync([FromForm] RefreshCommand command)
+    public async Task<IActionResult> RefreshAsync()
     {
+        var refreshToken = Request.Cookies[RefreshTokenCookie];
+
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            return Unauthorized("Refresh token cookie is missing.");
+        }
+
         try
         {
-            var result = await mediator.Send(command);
+            var result = await mediator.Send(new RefreshCommand { RefreshToken = refreshToken });
+            SetRefreshTokenCookie(result);
             return Ok(result);
         }
         catch (UnauthorizedException ex)
@@ -75,5 +87,17 @@ public class AuthController(IMediator mediator) : ControllerBase
         {
             return NotFound(ex.Message);
         }
+    }
+
+    private void SetRefreshTokenCookie(TokenDto token)
+    {
+        Response.Cookies.Append(RefreshTokenCookie, token.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/api/auth",
+            Expires = token.RefreshTokenExpiresAt
+        });
     }
 }
