@@ -1,10 +1,15 @@
-﻿using Backend.Domain.Entities;
+﻿using System.Globalization;
+using System.Text;
+using Backend.Domain.Entities;
+using Backend.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Infrastructure;
 
 public static class DbSeeder
 {
+    public const string SeedPassword = "Slaptazodis123";
+    
     public static async Task SeedAsync(AppDbContext db)
     {
        
@@ -13,8 +18,36 @@ public static class DbSeeder
             return;
         }
 
+        var users = new List<User>();
         var shops = new List<Shop>();
         var reviews = new List<Review>();
+        var passwordHasher = new PasswordHasher();
+
+        User AddUser(string email, string userName, string role)
+        {
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Email = email,
+                UserName = userName,
+                PasswordHash = string.Empty,
+                Role = role,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            user.PasswordHash = passwordHasher.Hash(user, SeedPassword);
+            users.Add(user);
+            return user;
+        }
+
+        User GetBuyer(string name)
+        {
+            var email = RemoveAccents(name).ToLower() + "@eturgus.lt";
+
+            return users.FirstOrDefault(u => u.Email == email) ?? AddUser(email, name, Roles.Buyer);
+        }
+
+        AddUser("admin@eturgus.lt", "Administratorius", Roles.Admin);
 
         Shop AddShop(string name, string description, string email, string phone)
         {
@@ -25,6 +58,7 @@ public static class DbSeeder
                 Description = description,
                 ContactEmail = email,
                 ContactPhone = phone,
+                OwnerId = AddUser(email, name, Roles.Seller).Id,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 Products = new List<Product>()
@@ -59,6 +93,7 @@ public static class DbSeeder
                     Content = r.Content,
                     Rating = r.Rating,
                     Author = r.Author,
+                    AuthorId = GetBuyer(r.Author).Id,
                     ProductId = product.Id,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -143,9 +178,25 @@ public static class DbSeeder
         AddProduct(garden, "Braškių daigai 10 vnt.", "Ankstyvos veislės daigai su šaknų gumulu.", 6.90m, 40,
             ("Prigijo gerai", "Visi dešimt daigų prigijo, jau žydi.", 4, "Nijolė"));
 
+        db.Users.AddRange(users);
         db.Shops.AddRange(shops);
         db.Reviews.AddRange(reviews);
 
         await db.SaveChangesAsync();
+    }
+
+    private static string RemoveAccents(string text)
+    {
+        var result = new StringBuilder();
+
+        foreach (var c in text.Normalize(NormalizationForm.FormD))
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+            {
+                result.Append(c);
+            }
+        }
+
+        return result.ToString();
     }
 }
