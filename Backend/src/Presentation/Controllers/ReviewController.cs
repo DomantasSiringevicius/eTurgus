@@ -7,6 +7,7 @@ using Backend.Application.UseCases.Reviews.GetReview;
 using Backend.Application.UseCases.Reviews.UpdateReview;
 using Backend.Presentation.Hypermedia;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
@@ -15,6 +16,7 @@ namespace Backend.Presentation.Controllers;
 [Route("api/shops/{shopId:guid}/products/{productId:guid}/reviews")]
 public class ReviewController(IMediator mediator) : ControllerBase
 {
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
         [FromForm] CreateReviewDto dto)
@@ -43,6 +45,7 @@ public class ReviewController(IMediator mediator) : ControllerBase
         }
     }
     
+    [Authorize]
     [HttpPut("{reviewId:guid}")]
     public async Task<IActionResult> UpdateAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
         [FromRoute] Guid reviewId, [FromForm] UpdateReviewDto dto)
@@ -69,6 +72,7 @@ public class ReviewController(IMediator mediator) : ControllerBase
         }
     }
     
+    [Authorize]
     [HttpDelete("{reviewId:guid}")]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
         [FromRoute] Guid reviewId)

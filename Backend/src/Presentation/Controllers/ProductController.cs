@@ -7,6 +7,7 @@ using Backend.Application.UseCases.Products.UpdateProduct;
 using Backend.Application.UseCases.Products.GetProduct;
 using Backend.Presentation.Hypermedia;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
@@ -15,6 +16,7 @@ namespace Backend.Presentation.Controllers;
 [Route("api/shops/{shopId:guid}/products")]
 public class ProductController(IMediator mediator) : ControllerBase
 {
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromRoute] Guid shopId, [FromForm] CreateProductDto dto)
     {
@@ -46,6 +48,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         }
     }
     
+    [Authorize]
     [HttpPut("{productId:guid}")]
     public async Task<IActionResult> UpdateAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
         [FromForm] UpdateProductDto dto)
@@ -75,6 +78,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpDelete("{productId:guid}")]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid shopId, [FromRoute] Guid productId)
     {

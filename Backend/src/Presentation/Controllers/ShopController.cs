@@ -9,6 +9,7 @@ using Backend.Application.UseCases.Shops.GetShopSummary;
 using Backend.Application.UseCases.Shops.UpdateShop;
 using Backend.Presentation.Hypermedia;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Presentation.Controllers;
@@ -17,6 +18,7 @@ namespace Backend.Presentation.Controllers;
 [Route("api/shops")]
 public class ShopController(IMediator mediator) : ControllerBase
 {
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromForm] CreateShopCommand command)
     {
@@ -32,6 +34,7 @@ public class ShopController(IMediator mediator) : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPut("{shopId:guid}")]
     public async Task<IActionResult> UpdateAsync([FromRoute] Guid shopId, [FromForm] UpdateShopDto dto)
     {
@@ -51,6 +54,7 @@ public class ShopController(IMediator mediator) : ControllerBase
         }
     }
     
+    [Authorize]
     [HttpDelete("{shopId:guid}")]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid shopId)
     {
