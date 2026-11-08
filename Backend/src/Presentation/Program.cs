@@ -1,9 +1,12 @@
+using System.Text;
 using Backend.Application.Interfaces;
 using Backend.Domain.IRepositories;
 using Backend.Infrastructure;
 using Backend.Infrastructure.Repositories;
 using Backend.Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +44,22 @@ if (jwtSettings.Key.Length < 32)
 builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtSettings.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
 builder.Services.AddMediatR(cfg => 
     cfg.RegisterServicesFromAssembly(typeof(Backend.Application.UseCases.Products.CreateProduct.CreateProductCommandHandler).Assembly));
 
@@ -64,6 +83,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
