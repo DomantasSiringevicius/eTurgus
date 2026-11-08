@@ -1,6 +1,9 @@
+using Backend.Application.Interfaces;
 using Backend.Domain.IRepositories;
 using Backend.Infrastructure;
 using Backend.Infrastructure.Repositories;
+using Backend.Infrastructure.Security;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +29,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IShopRepository, ShopRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 builder.Services.AddMediatR(cfg => 
     cfg.RegisterServicesFromAssembly(typeof(Backend.Application.UseCases.Products.CreateProduct.CreateProductCommandHandler).Assembly));
