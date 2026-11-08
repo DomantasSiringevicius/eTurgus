@@ -1,5 +1,6 @@
 ﻿using Backend.Application.Exceptions;
 using Backend.Application.Dtos.Review;
+using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
 
@@ -13,6 +14,11 @@ public class UpdateReviewCommandHandler(IReviewRepository reviewRepository)
         var review = await reviewRepository.GetByIdAsync(command.ShopId, command.ProductId, command.Id)
                ?? throw new NotFoundException($"Review with id '{command.Id}' not found for product '{command.ProductId}'.");
 
+        if (review.AuthorId != command.UserId && command.UserRole != Roles.Admin)
+        {
+            throw new ForbiddenException("Only the author or an admin can change this review.");
+        }
+
         if (command.ReviewDto.Rating < 1 || command.ReviewDto.Rating > 5)
         {
             throw new ValidationException("Rating must be between 1 and 5.");
@@ -21,7 +27,6 @@ public class UpdateReviewCommandHandler(IReviewRepository reviewRepository)
         review.Title = command.ReviewDto.Title;
         review.Content = command.ReviewDto.Content;
         review.Rating = command.ReviewDto.Rating;
-        review.Author = command.ReviewDto.Author;
         review.UpdatedAt = DateTime.Now;
 
         var updatedReview = await reviewRepository.UpdateAsync(review);
@@ -38,6 +43,7 @@ public class UpdateReviewCommandHandler(IReviewRepository reviewRepository)
             Content = updatedReview.Content,
             Rating = updatedReview.Rating,
             Author = updatedReview.Author,
+            AuthorId = updatedReview.AuthorId,
             ProductId = updatedReview.ProductId
         };
     }

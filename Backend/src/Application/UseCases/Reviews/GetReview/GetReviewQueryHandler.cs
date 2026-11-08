@@ -20,6 +20,7 @@ public class GetReviewQueryHandler(IReviewRepository reviewRepository)
             Content = review.Content,
             Rating = review.Rating,
             Author = review.Author,
+            AuthorId = review.AuthorId,
             ProductId = review.ProductId
         };
     }

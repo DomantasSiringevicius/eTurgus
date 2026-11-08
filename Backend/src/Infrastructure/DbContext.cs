@@ -40,5 +40,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasForeignKey(r => r.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+        
+        modelBuilder.Entity<Review>(e =>
+        {
+            e.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(r => r.AuthorId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
     }
 }
