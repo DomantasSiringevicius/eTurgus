@@ -9,4 +9,10 @@ public interface IUserRepository
     Task<User?> GetByIdAsync(Guid id);
 
     Task<User?> GetByEmailAsync(string email);
+
+    Task<(List<User> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? role);
+
+    Task UpdateAsync(User user);
+
+    Task DeleteAsync(User user);
 }

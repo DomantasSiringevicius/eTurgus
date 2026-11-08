@@ -105,7 +105,7 @@ Swagger'yje spausk **Authorize** ir įklijuok `accessToken` iš `login` atsakymo
 |---|---|
 | `Buyer` | Registruojantis |
 | `Seller` | Registruojantis |
-| `Admin` | Tik seederyje. Registruojantis `Admin` pasirinkti negalima (422) |
+| `Admin` | Seederyje arba kai kitas administratorius pakeičia rolę. Registruojantis `Admin` pasirinkti negalima (422) |
 
 ### Teisės
 
@@ -118,8 +118,19 @@ Visi `GET` prieinami be prisijungimo.
 | Kurti, keisti ar trinti prekes | – | Tik savo parduotuvėje | Visas |
 | Rašyti atsiliepimą | Taip | Taip | Taip |
 | Keisti ar trinti atsiliepimą | Tik savo | Tik savo | Visus |
+| Matyti naudotojus, keisti jų rolę, trinti juos | – | – | Taip |
 
 Be žetono rašymo veiksmai grąžina 401. Su žetonu, bet be reikiamos rolės arba ne savininkui, grąžinama 403.
+
+### Naudotojų valdymas (tik Admin)
+
+| Metodas | Kelias | Aprašymas |
+|---|---|---|
+| GET | `/api/users` | Naudotojų sąrašas. Puslapiuojamas (`page`, `pageSize`), filtras `role` |
+| PUT | `/api/users/{userId}/role` | Pakeisti naudotojo rolę: `Role` (`Admin`, `Seller` arba `Buyer`) |
+| DELETE | `/api/users/{userId}` | Ištrinti naudotoją |
+
+Administratorius negali pakeisti savo rolės ir ištrinti savęs (422). Ištrynus naudotoją, jo parduotuvės ir atsiliepimai lieka, tik be savininko ar autoriaus, o jo refresh žetonai ištrinami. Pakeista rolė įsigalioja po kito `refresh` arba prisijungimo, nes sena rolė dar yra galiojančiame access žetone.
 
 ### Pradiniai naudotojai
 
@@ -191,7 +202,8 @@ Importavus jį į Postman ir paleidus API, aplankus reikia vykdyti iš eilės:
 - `0. Auth` užregistruoja naują pardavėją ir pirkėją, prisijungia jais bei seederio `admin@eturgus.lt` ir `info@kaimoskoniai.lt`, o žetonus išsaugo kintamuosiuose. Taip pat tikrina registracijos ir prisijungimo klaidas, `refresh` ir `/me`.
 - `1–4` aplankai tikrina CRUD, puslapiavimą, filtrus ir klaidas. Parduotuves ir prekes kuria pardavėjas, atsiliepimus rašo pirkėjas.
 - `5. Authorization errors` tikrina 401 ir 403 atvejus (be žetono, pirkėjas kuria parduotuvę, svetimas pardavėjas, ne autorius) ir kad administratorius gali keisti svetimą parduotuvę.
-- `6. Delete` ištrina sukurtus duomenis, `7. Logout` atsijungia ir tikrina, kad refresh žetonas nebegalioja.
+- `6. Users (admin)` tikrina naudotojų sąrašą, rolės keitimą ir klaidas (403 ne administratoriui, 422 savo rolei ar netinkamai rolei, 404).
+- `7. Delete` ištrina sukurtus duomenis ir naudotoją, `8. Logout` atsijungia ir tikrina, kad refresh žetonas nebegalioja.
 
 Kūrimo užklausos pačios išsaugo `shopId`, `productId` ir `reviewId`. Rinkiniui reikia seederio naudotojų, todėl API turi veikti su pradiniais duomenimis.
 
