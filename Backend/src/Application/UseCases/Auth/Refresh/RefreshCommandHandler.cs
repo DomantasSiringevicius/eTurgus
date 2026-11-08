@@ -30,6 +30,7 @@ public class RefreshCommandHandler(
 
         var result = tokenService.CreateAccessToken(user);
         result.RefreshToken = newToken.Token;
+        result.RefreshTokenExpiresAt = newToken.ExpiresAt;
 
         return result;
     }

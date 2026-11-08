@@ -26,6 +26,7 @@ public class LoginCommandHandler(
 
         var result = tokenService.CreateAccessToken(user);
         result.RefreshToken = refreshToken.Token;
+        result.RefreshTokenExpiresAt = refreshToken.ExpiresAt;
 
         return result;
     }
