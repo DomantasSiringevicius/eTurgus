@@ -26,6 +26,7 @@ public class CreateReviewCommandHandler(IReviewRepository reviewRepository, IPro
             Content = command.Content,
             Rating = command.Rating,
             Author = command.Author,
+            AuthorId = command.AuthorId,
             ProductId = product.Id,
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now
@@ -40,6 +41,7 @@ public class CreateReviewCommandHandler(IReviewRepository reviewRepository, IPro
             Content = review.Content,
             Rating = review.Rating,
             Author = review.Author,
+            AuthorId = review.AuthorId,
             ProductId = review.ProductId
         };
     }

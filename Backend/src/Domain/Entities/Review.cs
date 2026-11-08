@@ -10,6 +10,8 @@ public class Review : Entity
     
     public required string Author { get; set; }
     
+    public Guid? AuthorId { get; set; }
+    
     public required Guid ProductId { get; set; }
     
     public Product Product { get; set; } = null!;

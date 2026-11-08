@@ -5,6 +5,7 @@ using Backend.Application.UseCases.Reviews.DeleteReview;
 using Backend.Application.UseCases.Reviews.GetAllReviews;
 using Backend.Application.UseCases.Reviews.GetReview;
 using Backend.Application.UseCases.Reviews.UpdateReview;
+using Backend.Presentation.Extensions;
 using Backend.Presentation.Hypermedia;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +29,8 @@ public class ReviewController(IMediator mediator) : ControllerBase
                 Title = dto.Title,
                 Content = dto.Content,
                 Rating = dto.Rating,
-                Author = dto.Author,
+                Author = User.GetUserName(),
+                AuthorId = User.GetUserId(),
                 ShopId = shopId,
                 ProductId = productId
             });
@@ -57,10 +59,16 @@ public class ReviewController(IMediator mediator) : ControllerBase
                 ShopId = shopId,
                 ProductId = productId,
                 Id = reviewId,
-                ReviewDto = dto
+                ReviewDto = dto,
+                UserId = User.GetUserId(),
+                UserRole = User.GetRole()
             });
             result.Links = LinkFactory.ForReview(shopId, result.ProductId, result.Id);
             return Ok(result);
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
         }
         catch (NotFoundException ex)
         {
@@ -83,9 +91,15 @@ public class ReviewController(IMediator mediator) : ControllerBase
             {
                 ShopId = shopId,
                 ProductId = productId,
-                Id = reviewId
+                Id = reviewId,
+                UserId = User.GetUserId(),
+                UserRole = User.GetRole()
             });
             return NoContent();
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
         }
         catch (NotFoundException ex)
         {

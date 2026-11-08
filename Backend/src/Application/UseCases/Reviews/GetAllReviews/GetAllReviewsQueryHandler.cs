@@ -26,6 +26,7 @@ public class GetAllReviewsQueryHandler(IReviewRepository reviewRepository, IProd
                 Content = review.Content,
                 Rating = review.Rating,
                 Author = review.Author,
+                AuthorId = review.AuthorId,
                 ProductId = review.ProductId
             }).ToList(),
             Page = query.Page,

@@ -12,6 +12,8 @@ public class ReviewDto
     
     public required string Author { get; set; }
     
+    public Guid? AuthorId { get; set; }
+    
     public required Guid ProductId { get; set; }
 
     public List<LinkDto> Links { get; set; } = new List<LinkDto>();
