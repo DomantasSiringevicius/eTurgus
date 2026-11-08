@@ -3,6 +3,7 @@ using Backend.Application.Dtos.Auth;
 using Backend.Application.Exceptions;
 using Backend.Application.UseCases.Auth.GetCurrentUser;
 using Backend.Application.UseCases.Auth.Login;
+using Backend.Application.UseCases.Auth.Logout;
 using Backend.Application.UseCases.Auth.Refresh;
 using Backend.Application.UseCases.Auth.Register;
 using MediatR;
@@ -17,7 +18,7 @@ public class AuthController(IMediator mediator) : ControllerBase
 {
     private const string RefreshTokenCookie = "refreshToken";
 
-[HttpPost("register")]
+    [HttpPost("register")]
     public async Task<IActionResult> RegisterAsync([FromForm] RegisterCommand command)
     {
         try
@@ -70,6 +71,27 @@ public class AuthController(IMediator mediator) : ControllerBase
         {
             return Unauthorized(ex.Message);
         }
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        var refreshToken = Request.Cookies[RefreshTokenCookie];
+
+        if (!string.IsNullOrEmpty(refreshToken))
+        {
+            await mediator.Send(new LogoutCommand { RefreshToken = refreshToken });
+        }
+
+        Response.Cookies.Delete(RefreshTokenCookie, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/api/auth"
+        });
+
+        return NoContent();
     }
 
     [Authorize]
