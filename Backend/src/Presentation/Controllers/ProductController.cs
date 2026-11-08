@@ -1,5 +1,6 @@
 ﻿using Backend.Application.Dtos.Product;
 using Backend.Application.Exceptions;
+using Backend.Domain.Entities;
 using Backend.Application.UseCases.Products.CreateProduct;
 using Backend.Application.UseCases.Products.DeleteProduct;
 using Backend.Application.UseCases.Products.GetAllProducts;
@@ -16,7 +17,7 @@ namespace Backend.Presentation.Controllers;
 [Route("api/shops/{shopId:guid}/products")]
 public class ProductController(IMediator mediator) : ControllerBase
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Seller + "," + Roles.Admin)]
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromRoute] Guid shopId, [FromForm] CreateProductDto dto)
     {
@@ -48,7 +49,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         }
     }
     
-    [Authorize]
+    [Authorize(Roles = Roles.Seller + "," + Roles.Admin)]
     [HttpPut("{productId:guid}")]
     public async Task<IActionResult> UpdateAsync([FromRoute] Guid shopId, [FromRoute] Guid productId,
         [FromForm] UpdateProductDto dto)
@@ -78,7 +79,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         }
     }
 
-    [Authorize]
+    [Authorize(Roles = Roles.Seller + "," + Roles.Admin)]
     [HttpDelete("{productId:guid}")]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid shopId, [FromRoute] Guid productId)
     {
