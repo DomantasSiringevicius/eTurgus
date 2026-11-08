@@ -3,7 +3,6 @@ using Backend.Domain.IRepositories;
 using Backend.Infrastructure;
 using Backend.Infrastructure.Repositories;
 using Backend.Infrastructure.Security;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +29,17 @@ builder.Services.AddScoped<IShopRepository, ShopRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
+    ?? throw new InvalidOperationException("Jwt settings not found.");
+
+if (jwtSettings.Key.Length < 32)
+{
+    throw new InvalidOperationException("Jwt:Key must be at least 32 characters long. Set it with dotnet user-secrets.");
+}
+
+builder.Services.AddSingleton(jwtSettings);
+builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 builder.Services.AddMediatR(cfg => 
     cfg.RegisterServicesFromAssembly(typeof(Backend.Application.UseCases.Products.CreateProduct.CreateProductCommandHandler).Assembly));
