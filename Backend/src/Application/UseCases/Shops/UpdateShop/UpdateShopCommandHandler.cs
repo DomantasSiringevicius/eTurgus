@@ -18,6 +18,11 @@ public class UpdateShopCommandHandler(IShopRepository shopRepository)
             throw new NotFoundException($"Shop with id '{command.Id}' not found.");
         }
 
+        if (shop.OwnerId != command.UserId && command.UserRole != Roles.Admin)
+        {
+            throw new ForbiddenException("Only the shop owner or an admin can change this shop.");
+        }
+
         var shopWithSameName = await shopRepository.GetByNameAsync(command.ShopDto.Name);
 
         if (shopWithSameName is not null && shopWithSameName.Id != shop.Id)
@@ -44,7 +49,8 @@ public class UpdateShopCommandHandler(IShopRepository shopRepository)
             Name = updatedShop.Name,
             Description = updatedShop.Description,
             ContactEmail = updatedShop.ContactEmail,
-            ContactPhone = updatedShop.ContactPhone
+            ContactPhone = updatedShop.ContactPhone,
+            OwnerId = updatedShop.OwnerId
         };
     }
 }

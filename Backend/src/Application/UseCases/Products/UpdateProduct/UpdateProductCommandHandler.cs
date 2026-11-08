@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Backend.Application.UseCases.Products.UpdateProduct;
 
-public class UpdateProductCommandHandler(IProductRepository productRepository)
+public class UpdateProductCommandHandler(IProductRepository productRepository, IShopRepository shopRepository)
     : IRequestHandler<UpdateProductCommand, ProductDto>
 {
     public async Task<ProductDto> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
@@ -40,6 +40,18 @@ public class UpdateProductCommandHandler(IProductRepository productRepository)
 
     private async Task<Product> ValidateAsync(UpdateProductCommand command)
     {
+        var shop = await shopRepository.GetByIdAsync(command.ShopId);
+
+        if (shop is null)
+        {
+            throw new NotFoundException($"Shop with id '{command.ShopId}' not found.");
+        }
+
+        if (shop.OwnerId != command.UserId && command.UserRole != Roles.Admin)
+        {
+            throw new ForbiddenException("Only the shop owner or an admin can change this shop.");
+        }
+
         var product = await productRepository.GetByIdAsync(command.ShopId, command.ProductId);
 
         if (product is null)

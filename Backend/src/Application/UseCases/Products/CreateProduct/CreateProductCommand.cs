@@ -16,5 +16,9 @@ public class CreateProductCommand : IRequest<ProductDto>
     public required string PictureUri { get; set; }
     
     public required Guid ShopId { get; set; }
+
+    public required Guid UserId { get; set; }
+
+    public required string UserRole { get; set; }
 }
 

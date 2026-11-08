@@ -24,6 +24,7 @@ public class CreateShopCommandHandler(IShopRepository shopRepository) : IRequest
             Description = command.Description,
             ContactEmail = command.ContactEmail,
             ContactPhone = command.ContactPhone,
+            OwnerId = command.OwnerId,
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now,
             Products = new List<Product>()
@@ -37,7 +38,8 @@ public class CreateShopCommandHandler(IShopRepository shopRepository) : IRequest
             Name = shop.Name,
             Description = shop.Description,
             ContactEmail = shop.ContactEmail,
-            ContactPhone = shop.ContactPhone
+            ContactPhone = shop.ContactPhone,
+            OwnerId = shop.OwnerId
         };
     }
 }

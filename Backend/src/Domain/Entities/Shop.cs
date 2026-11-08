@@ -10,5 +10,9 @@ public class Shop : Entity
     
     public required string ContactPhone { get; set; } 
     
+    public Guid? OwnerId { get; set; }
+    
+    public User? Owner { get; set; }
+    
     public List<Product> Products { get; set; } = new List<Product>();
 }

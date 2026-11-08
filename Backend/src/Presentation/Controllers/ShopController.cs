@@ -8,6 +8,7 @@ using Backend.Application.UseCases.Shops.GetAllShops;
 using Backend.Application.UseCases.Shops.GetShop;
 using Backend.Application.UseCases.Shops.GetShopSummary;
 using Backend.Application.UseCases.Shops.UpdateShop;
+using Backend.Presentation.Extensions;
 using Backend.Presentation.Hypermedia;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -21,11 +22,18 @@ public class ShopController(IMediator mediator) : ControllerBase
 {
     [Authorize(Roles = Roles.Seller + "," + Roles.Admin)]
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromForm] CreateShopCommand command)
+    public async Task<IActionResult> CreateAsync([FromForm] CreateShopDto dto)
     {
         try
         {
-            var result = await mediator.Send(command);
+            var result = await mediator.Send(new CreateShopCommand
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                ContactEmail = dto.ContactEmail,
+                ContactPhone = dto.ContactPhone,
+                OwnerId = User.GetUserId()
+            });
             result.Links = LinkFactory.ForShop(result.Id);
             return Created($"/api/shops/{result.Id}", result);
         }
@@ -41,9 +49,19 @@ public class ShopController(IMediator mediator) : ControllerBase
     {
         try
         {
-            var result = await mediator.Send(new UpdateShopCommand() { Id = shopId, ShopDto = dto });
+            var result = await mediator.Send(new UpdateShopCommand()
+            {
+                Id = shopId,
+                ShopDto = dto,
+                UserId = User.GetUserId(),
+                UserRole = User.GetRole()
+            });
             result.Links = LinkFactory.ForShop(result.Id);
             return Ok(result);
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
         }
         catch (NotFoundException ex)
         {
@@ -61,8 +79,17 @@ public class ShopController(IMediator mediator) : ControllerBase
     {
         try
         {
-            await mediator.Send(new DeleteShopCommand() { Id = shopId });
+            await mediator.Send(new DeleteShopCommand()
+            {
+                Id = shopId,
+                UserId = User.GetUserId(),
+                UserRole = User.GetRole()
+            });
             return NoContent();
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
         }
         catch (NotFoundException ex)
         {

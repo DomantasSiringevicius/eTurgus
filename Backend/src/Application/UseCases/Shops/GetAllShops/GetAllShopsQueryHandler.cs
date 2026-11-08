@@ -20,7 +20,8 @@ public class GetAllShopsQueryHandler(IShopRepository shopRepository)
                 Name = shop.Name,
                 Description = shop.Description,
                 ContactEmail = shop.ContactEmail,
-                ContactPhone = shop.ContactPhone
+                ContactPhone = shop.ContactPhone,
+                OwnerId = shop.OwnerId
             }).ToList(),
             Page = query.Page,
             PageSize = query.PageSize,

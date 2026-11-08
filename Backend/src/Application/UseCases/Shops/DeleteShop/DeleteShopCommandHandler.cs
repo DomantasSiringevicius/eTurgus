@@ -1,4 +1,5 @@
 ﻿using Backend.Application.Exceptions;
+using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
 
@@ -14,6 +15,11 @@ public class DeleteShopCommandHandler(IShopRepository shopRepository)
         if (shop is null)
         {
             throw new NotFoundException($"Shop with id '{command.Id}' not found.");
+        }
+
+        if (shop.OwnerId != command.UserId && command.UserRole != Roles.Admin)
+        {
+            throw new ForbiddenException("Only the shop owner or an admin can change this shop.");
         }
 
         var result = await shopRepository.DeleteAsync(shop);
