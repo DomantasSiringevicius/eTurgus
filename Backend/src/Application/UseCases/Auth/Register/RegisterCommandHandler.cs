@@ -4,7 +4,7 @@ using Backend.Application.Interfaces;
 using Backend.Domain.Entities;
 using Backend.Domain.IRepositories;
 using MediatR;
-using ValidationException = System.ComponentModel.DataAnnotations.ValidationException;
+using Backend.Application.Exceptions;
 
 namespace Backend.Application.UseCases.Auth.Register;
 
