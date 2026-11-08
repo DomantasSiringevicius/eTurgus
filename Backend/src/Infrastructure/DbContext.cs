@@ -8,17 +8,27 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Product> Products { get; set; }
     public DbSet<Shop> Shops { get; set; }
     public DbSet<Review> Reviews { get; set; }
-
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(e => { e.HasIndex(u => u.Email).IsUnique(); });
+        
+        modelBuilder.Entity<RefreshToken>(e =>
+        {
+            e.HasIndex(t => t.Token).IsUnique();
+
+            e.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         modelBuilder.Entity<Shop>(e =>
         {
             e.HasIndex(s => s.Name).IsUnique();
-            
+
             e.HasOne(s => s.Owner)
                 .WithMany()
                 .HasForeignKey(s => s.OwnerId)
@@ -40,7 +50,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasForeignKey(r => r.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-        
+
         modelBuilder.Entity<Review>(e =>
         {
             e.HasOne<User>()

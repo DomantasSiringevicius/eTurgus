@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                       ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connectionString));
@@ -32,13 +32,15 @@ builder.Services.AddScoped<IShopRepository, ShopRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
-    ?? throw new InvalidOperationException("Jwt settings not found.");
+                  ?? throw new InvalidOperationException("Jwt settings not found.");
 
 if (jwtSettings.Key.Length < 32)
 {
-    throw new InvalidOperationException("Jwt:Key must be at least 32 characters long. Set it with dotnet user-secrets.");
+    throw new InvalidOperationException(
+        "Jwt:Key must be at least 32 characters long. Set it with dotnet user-secrets.");
 }
 
 builder.Services.AddSingleton(jwtSettings);
@@ -60,8 +62,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddMediatR(cfg => 
-    cfg.RegisterServicesFromAssembly(typeof(Backend.Application.UseCases.Products.CreateProduct.CreateProductCommandHandler).Assembly));
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(
+        typeof(Backend.Application.UseCases.Products.CreateProduct.CreateProductCommandHandler).Assembly));
 
 builder.Services.AddCors(options =>
 {

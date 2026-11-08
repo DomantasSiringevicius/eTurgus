@@ -9,6 +9,7 @@ namespace Backend.Application.UseCases.Auth.Login;
 public class LoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
+    IRefreshTokenRepository refreshTokenRepository,
     ITokenService tokenService) : IRequestHandler<LoginCommand, TokenDto>
 {
     public async Task<TokenDto> Handle(LoginCommand command, CancellationToken cancellationToken)
@@ -20,6 +21,12 @@ public class LoginCommandHandler(
             throw new UnauthorizedException("Invalid email or password.");
         }
 
-        return tokenService.CreateAccessToken(user);
+        var refreshToken = tokenService.CreateRefreshToken(user);
+        await refreshTokenRepository.CreateAsync(refreshToken);
+
+        var result = tokenService.CreateAccessToken(user);
+        result.RefreshToken = refreshToken.Token;
+
+        return result;
     }
 }

@@ -2,6 +2,7 @@
 using Backend.Application.Exceptions;
 using Backend.Application.UseCases.Auth.GetCurrentUser;
 using Backend.Application.UseCases.Auth.Login;
+using Backend.Application.UseCases.Auth.Refresh;
 using Backend.Application.UseCases.Auth.Register;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -44,7 +45,7 @@ public class AuthController(IMediator mediator) : ControllerBase
             return Unauthorized(ex.Message);
         }
     }
-    
+
     [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUserAsync()
@@ -59,6 +60,20 @@ public class AuthController(IMediator mediator) : ControllerBase
         catch (NotFoundException ex)
         {
             return NotFound(ex.Message);
+        }
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshAsync([FromForm] RefreshCommand command)
+    {
+        try
+        {
+            var result = await mediator.Send(command);
+            return Ok(result);
+        }
+        catch (UnauthorizedException ex)
+        {
+            return Unauthorized(ex.Message);
         }
     }
 }
